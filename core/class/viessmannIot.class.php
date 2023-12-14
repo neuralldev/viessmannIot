@@ -87,6 +87,70 @@ class viessmannIot extends eqLogic
     public const FORCED_LAST_FROM_SCHEDULE = "operating.programs.forcedLastFromSchedule";
     public const SOLAR_TEMPERATURE = "heating.solar.sensors.temperature.collector";
     public const SOLAR_DHW_TEMPERATURE = "heating.solar.sensors.temperature.dhw";
+  
+
+//    heating.buffer.sensors.temperature.main = température du tampon
+//    heating.buffer.sensors.temperature.top= temperature du haut du tampon
+//    heating.circuits.1.heating.curve = pente 
+//    heating.circuits.1.operating.modes.heating = booleen, chauffe ou pas
+//    heating.circuits.0.heating.curve => setcurve 
+//    heating.compressors.0.statistics = stats compresseur -> 
+//        .starts = nb de départs
+//        .hours = nb heures de fct
+//    heating.boiler.serial = S/N chaudiere
+//    heating.controller.seria = S/N contrôleur
+//   heating.circuits.1.temperature = température de l'eau dans le circuit
+//   heating.circuits.1.operating.programs.standby = .active = booleen
+//   heating.circuits.1.circulation.pump = .status = "on" ou "off" état du circulateur
+//  heating.bufferCylinder.sensors.temperature.top = .value, température en haut du tampon
+//  heating.bufferCylinder.sensors.temperature.main = .value, température au centre du tampon
+//  heating.compressors.0 = compresseur 
+//      .active = booléen en marche ou arrêté
+//      .phase = état du compresseur, ex "pass defrost" => dégivrage
+//  heating.sensors.temperature.outside = temperature exterieure via sonde PAC
+//      .value = valeur
+//      .status = connected si détectée
+public const HEATPUMP_ROOM_TEMPERATURE ="heating.circuits.1.sensors.temperature.room";
+//  heating.circuits.1.sensors.temperature.room = sonde de température vitotrol
+//      .value = valeur
+//      .status = connected si détectée
+// heating.sensors.temperature.return = capteur du circuit de retour d'eau
+//      .value = valeur
+//      .status = connected si détectée
+// heating.boiler.sensors.temperature.commonSupply = capteur de température de sortie vers le réseau
+//      .value = valeur
+//      .status = connected si détectée
+//  heating.circuits.1.operating.modes.forcedReduced
+//      .active = booléen en marche ou arrêté
+//  heating.secondaryCircuit.sensors.temperature.supply = circuit de délestage secondaire
+//      .value = valeur
+//      .status = connected si détectée
+public const HEATPUMP_STANDBY ="heating.circuits.1.operating.modes.standby";
+//  heating.circuits.1.operating.modes.standby = .active , mode veille actif
+//  heating.circuits.1.sensors.temperature.supply = sonde temperature en sortie de split
+//      .value = valeur
+//      .status = connected si détectée
+// heating.circuits.1.operating.modes.forcedNormal = .active, mode normal forcé vs schedule
+// heating.primaryCircuit.sensors.temperature.supply = température eau en entrée de split
+//      .value = valeur
+//      .status = connected si détectée
+public const HEATPUMP_CURRENTMODE ="heating.circuits.1.operating.programs.active";
+// heating.circuits.1.operating.programs.active = .value, mode courant
+public const HEATPUMP_COMFORTMODE ="heating.circuits.1.operating.programs.comfort";
+// heating.circuits.1.operating.programs.comfort  = mode confort
+//          .active -> actif booleen
+//          .demand -> "unknown" ????
+//          .temperature -> température du mode
+public const HEATPUMP_NORMALMODE ="heating.circuits.1.operating.programs.normal";
+//    heating.circuits.1.operating.programs.normal => setTemperature targetTemperature
+//          .active -> actif booleen
+//          .demand -> "unknown" ????
+//          .temperature -> température du mode
+public const HEATPUMP_ECOMODE ="heating.circuits.1.operating.programs.reduced";
+//  heating.circuits.1.operating.programs.reduced = programme éco
+//          .active -> actif booleen
+//          .demand -> "unknown" ????
+//          .temperature -> température du mode
 
     public static function deamon_info()
     {
@@ -1673,6 +1737,12 @@ class viessmannIot extends eqLogic
                 $outsideTemperature = $val;
             } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::PUMP_STATUS) && $features["data"][$i]["isEnabled"] == true) {
                 $val = $features["data"][$i]["properties"]["status"]["value"];
+                $obj = $this->getCmd(null, 'pumpStatus');
+                if (is_object($obj)) {
+                    $obj->event($val);
+                }
+            } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STANDBY) && $features["data"][$i]["isEnabled"] == true) {
+                $val = $features["data"][$i]["properties"]["active"]["value"];
                 $obj = $this->getCmd(null, 'pumpStatus');
                 if (is_object($obj)) {
                     $obj->event($val);
