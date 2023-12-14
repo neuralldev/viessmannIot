@@ -101,7 +101,7 @@ class viessmannIot extends eqLogic
 //    heating.controller.seria = S/N contrôleur
 //   heating.circuits.1.temperature = température de l'eau dans le circuit
 //   heating.circuits.1.operating.programs.standby = .active = booleen
-public const HEATPUMP_STATUS ="heating.circuits.1.circulation.pump";
+public const HEATPUMP_STATUS ="circulation.pump";
 //   heating.circuits.1.circulation.pump = .status = "on" ou "off" état du circulateur
 //  heating.bufferCylinder.sensors.temperature.top = .value, température en haut du tampon
 //  heating.bufferCylinder.sensors.temperature.main = .value, température au centre du tampon
@@ -111,7 +111,7 @@ public const HEATPUMP_STATUS ="heating.circuits.1.circulation.pump";
 //  heating.sensors.temperature.outside = temperature exterieure via sonde PAC
 //      .value = valeur
 //      .status = connected si détectée
-public const HEATPUMP_ROOM_TEMPERATURE ="heating.circuits.1.sensors.temperature.room";
+public const HEATPUMP_ROOM_TEMPERATURE ="sensors.temperature.room";
 //  heating.circuits.1.sensors.temperature.room = sonde de température vitotrol
 //      .value = valeur
 //      .status = connected si détectée
@@ -126,7 +126,7 @@ public const HEATPUMP_ROOM_TEMPERATURE ="heating.circuits.1.sensors.temperature.
 //  heating.secondaryCircuit.sensors.temperature.supply = circuit de délestage secondaire
 //      .value = valeur
 //      .status = connected si détectée
-public const HEATPUMP_STANDBY ="heating.circuits.1.operating.modes.standby";
+public const HEATPUMP_STANDBY ="operating.modes.standby";
 //  heating.circuits.1.operating.modes.standby = .active , mode veille actif
 //  heating.circuits.1.sensors.temperature.supply = sonde temperature en sortie de split
 //      .value = valeur
@@ -135,19 +135,19 @@ public const HEATPUMP_STANDBY ="heating.circuits.1.operating.modes.standby";
 // heating.primaryCircuit.sensors.temperature.supply = température eau en entrée de split
 //      .value = valeur
 //      .status = connected si détectée
-public const HEATPUMP_CURRENTMODE ="heating.circuits.1.operating.programs.active";
+public const HEATPUMP_CURRENTMODE ="operating.programs.active";
 // heating.circuits.1.operating.programs.active = .value, mode courant
-public const HEATPUMP_COMFORTMODE ="heating.circuits.1.operating.programs.comfort";
+public const HEATPUMP_COMFORTMODE ="operating.programs.comfort";
 // heating.circuits.1.operating.programs.comfort  = mode confort
 //          .active -> actif booleen
 //          .demand -> "unknown" ????
 //          .temperature -> température du mode
-public const HEATPUMP_NORMALMODE ="heating.circuits.1.operating.programs.normal";
+public const HEATPUMP_NORMALMODE ="operating.programs.normal";
 //    heating.circuits.1.operating.programs.normal => setTemperature targetTemperature
 //          .active -> actif booleen
 //          .demand -> "unknown" ????
 //          .temperature -> température du mode
-public const HEATPUMP_ECOMODE ="heating.circuits.1.operating.programs.reduced";
+public const HEATPUMP_ECOMODE ="operating.programs.reduced";
 //  heating.circuits.1.operating.programs.reduced = programme éco
 //          .active -> actif booleen
 //          .demand -> "unknown" ????
