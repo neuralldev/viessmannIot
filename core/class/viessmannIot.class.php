@@ -101,6 +101,7 @@ class viessmannIot extends eqLogic
 //    heating.controller.seria = S/N contrôleur
 //   heating.circuits.1.temperature = température de l'eau dans le circuit
 //   heating.circuits.1.operating.programs.standby = .active = booleen
+public const HEATPUMP_STATUS ="heating.circuits.1.circulation.pump";
 //   heating.circuits.1.circulation.pump = .status = "on" ou "off" état du circulateur
 //  heating.bufferCylinder.sensors.temperature.top = .value, température en haut du tampon
 //  heating.bufferCylinder.sensors.temperature.main = .value, température au centre du tampon
@@ -256,18 +257,18 @@ public const HEATPUMP_ECOMODE ="heating.circuits.1.operating.programs.reduced";
                 $obj->setSubType('string');
                 $obj->setLogicalId('pumpStatus');
                 $obj->save();
-            } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STANDBY) && $features["data"][$i]["isEnabled"] == true) {
-                $obj = $this->getCmd(null, 'hotWaterStorageTemperature');
+            } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STATUS) && $features["data"][$i]["isEnabled"] == true) {
+                $obj = $this->getCmd(null, 'pumpStatus');
                 if (!is_object($obj)) {
                     $obj = new viessmannIotCmd();
-                    $obj->setName(__('Température eau chaude', __FILE__));
+                    $obj->setName(__('Statut circulateur', __FILE__));
                     $obj->setIsVisible(1);
                     $obj->setIsHistorized(0);
                 }
                 $obj->setEqLogic_id($this->getId());
                 $obj->setType('info');
-                $obj->setSubType('numeric');
-                $obj->setLogicalId('hotWaterStorageTemperature');
+                $obj->setSubType('string');
+                $obj->setLogicalId('pumpStatus');
                 $obj->save();
             } elseif ($features["data"][$i]["feature"] == self::HOT_WATER_STORAGE_TEMPERATURE && $features["data"][$i]["isEnabled"] == true) {
                 $obj = $this->getCmd(null, 'hotWaterStorageTemperature');
