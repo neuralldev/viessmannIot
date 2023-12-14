@@ -259,6 +259,7 @@ public const HEATPUMP_ECOMODE ="heating.circuits.1.operating.programs.reduced";
                 $obj->save();
             } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STATUS) && $features["data"][$i]["isEnabled"] == true) {
                 $obj = $this->getCmd(null, 'pumpStatus');
+                log::add('viessmannIot', 'debug', 'heatpump status command');
                 if (!is_object($obj)) {
                     $obj = new viessmannIotCmd();
                     $obj->setName(__('Statut circulateur', __FILE__));
@@ -1755,7 +1756,8 @@ public const HEATPUMP_ECOMODE ="heating.circuits.1.operating.programs.reduced";
                 if (is_object($obj)) {
                     $obj->event($val);
                 }
-            } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STANDBY) && $features["data"][$i]["isEnabled"] == true) {
+            } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STATUS) && $features["data"][$i]["isEnabled"] == true) {
+                log::add('viessmannIot', 'debug', 'heatpump status refresh');
                 $val = $features["data"][$i]["properties"]["active"]["value"];
                 $obj = $this->getCmd(null, 'pumpStatus');
                 if (is_object($obj)) {
