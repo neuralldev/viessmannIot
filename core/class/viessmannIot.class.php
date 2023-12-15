@@ -111,7 +111,6 @@ class viessmannIot extends eqLogic
 //  heating.sensors.temperature.outside = temperature exterieure via sonde PAC
 //      .value = valeur
 //      .status = connected si détectée
-    public const HEATPUMP_ROOM_TEMPERATURE = "sensors.temperature.room";
     //  heating.circuits.1.sensors.temperature.room = sonde de température vitotrol
 //      .value = valeur
 //      .status = connected si détectée
@@ -123,11 +122,11 @@ class viessmannIot extends eqLogic
 //      .status = connected si détectée
 //  heating.circuits.1.operating.modes.forcedReduced
 //      .active = booléen en marche ou arrêté
+public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.supply";
 //  heating.secondaryCircuit.sensors.temperature.supply = circuit de délestage secondaire
 //      .value = valeur
 //      .status = connected si détectée
-    public const HEATPUMP_STANDBY = "operating.modes.standby";
-    //  heating.circuits.1.operating.modes.standby = .active , mode veille actif
+//  heating.circuits.1.operating.modes.standby = .active , mode veille actif
 //  heating.circuits.1.sensors.temperature.supply = sonde temperature en sortie de split
 //      .value = valeur
 //      .status = connected si détectée
@@ -135,19 +134,15 @@ class viessmannIot extends eqLogic
 // heating.primaryCircuit.sensors.temperature.supply = température eau en entrée de split
 //      .value = valeur
 //      .status = connected si détectée
-    public const HEATPUMP_CURRENTMODE = "operating.programs.active";
     // heating.circuits.1.operating.programs.active = .value, mode courant
-    public const HEATPUMP_COMFORTMODE = "operating.programs.comfort";
     // heating.circuits.1.operating.programs.comfort  = mode confort
 //          .active -> actif booleen
 //          .demand -> "unknown" ????
 //          .temperature -> température du mode
-    public const HEATPUMP_NORMALMODE = "operating.programs.normal";
     //    heating.circuits.1.operating.programs.normal => setTemperature targetTemperature
 //          .active -> actif booleen
 //          .demand -> "unknown" ????
 //          .temperature -> température du mode
-    public const HEATPUMP_ECOMODE = "operating.programs.reduced";
     //  heating.circuits.1.operating.programs.reduced = programme éco
 //          .active -> actif booleen
 //          .demand -> "unknown" ????
@@ -244,7 +239,7 @@ class viessmannIot extends eqLogic
         $features = $viessmannApi->getArrayFeatures();
         $n = count($features["data"]);
         // debug
-        if ($features["data"][$i]["isEnabled"] == true)
+        if ($n > 0)
             log::add('viessmannIot', 'debug', "parse " . $n . " features");
         // debug
 
@@ -255,7 +250,6 @@ class viessmannIot extends eqLogic
             // debug
             if ($features["data"][$i]["isEnabled"] == true) {
                 if ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::PUMP_STATUS)) {
-                    log::add('viessmannIot', 'debug', 'pump status command');
                     $obj = $this->getCmd(null, 'pumpStatus');
                     if (!is_object($obj)) {
                         $obj = new viessmannIotCmd();
@@ -270,7 +264,6 @@ class viessmannIot extends eqLogic
                     $obj->save();
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STATUS)) {
                     $obj = $this->getCmd(null, 'pumpStatus');
-                    log::add('viessmannIot', 'debug', 'heatpump status command');
                     if (!is_object($obj)) {
                         $obj = new viessmannIotCmd();
                         $obj->setName(__('Statut circulateur', __FILE__));
@@ -281,6 +274,20 @@ class viessmannIot extends eqLogic
                     $obj->setType('info');
                     $obj->setSubType('string');
                     $obj->setLogicalId('pumpStatus');
+                    $obj->save();
+// secondary circuit
+                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_SECONDARY)) {
+                    $obj = $this->getCmd(null, 'secondaryCircuit');
+                    if (!is_object($obj)) {
+                        $obj = new viessmannIotCmd();
+                        $obj->setName(__('Circuit de délestage', __FILE__));
+                        $obj->setIsVisible(1);
+                        $obj->setIsHistorized(0);
+                    }
+                    $obj->setEqLogic_id($this->getId());
+                    $obj->setType('info');
+                    $obj->setSubType('string');
+                    $obj->setLogicalId('secondaryCircuit');
                     $obj->save();
                 } elseif ($features["data"][$i]["feature"] == self::HOT_WATER_STORAGE_TEMPERATURE) {
                     $obj = $this->getCmd(null, 'hotWaterStorageTemperature');
@@ -1778,6 +1785,13 @@ class viessmannIot extends eqLogic
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::PUMP_STATUS)) {
                     $val = $features["data"][$i]["properties"]["status"]["value"];
                     $obj = $this->getCmd(null, 'pumpStatus');
+                    if (is_object($obj)) {
+                        $obj->event($val);
+                    }
+                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_SECONDARY)) {
+                    log::add('viessmannIot', 'debug', 'heatpump delestage');
+                    $val = $features["data"][$i]["properties"]["status"]["value"];
+                    $obj = $this->getCmd(null, 'secondaryCircuit');
                     if (is_object($obj)) {
                         $obj->event($val);
                     }
