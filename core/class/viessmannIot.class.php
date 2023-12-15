@@ -244,11 +244,8 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         // debug
 
         for ($i = 0; $i < $n; $i++) {
-            // debug
-            if ($features["data"][$i]["isEnabled"] == true)
-                log::add('viessmannIot', 'debug', $features["data"][$i]["feature"]);
-            // debug
             if ($features["data"][$i]["isEnabled"] == true) {
+                log::add('viessmannIot', 'debug', $features["data"][$i]["feature"]);
                 if ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::PUMP_STATUS)) {
                     $obj = $this->getCmd(null, 'pumpStatus');
                     if (!is_object($obj)) {
@@ -277,6 +274,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     $obj->save();
 // secondary circuit
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_SECONDARY)) {
+                    log::add('viessmannIot', 'debug', 'secondaire trouvé');
                     $obj = $this->getCmd(null, 'secondaryCircuit');
                     if (!is_object($obj)) {
                         $obj = new viessmannIotCmd();
