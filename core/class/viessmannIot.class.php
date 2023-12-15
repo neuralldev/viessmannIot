@@ -243,6 +243,11 @@ public const HEATPUMP_ECOMODE ="operating.programs.reduced";
 
         $features = $viessmannApi->getArrayFeatures();
         $n = count($features["data"]);
+            // debug
+            if ($features["data"][$i]["isEnabled"] == true)
+                log::add('viessmannIot', 'debug', "parse " . $n. " features");        
+            // debug
+
         for ($i = 0; $i < $n; $i++) {
             // debug
             if ($features["data"][$i]["isEnabled"] == true)
