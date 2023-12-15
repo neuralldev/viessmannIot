@@ -274,24 +274,25 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     $obj->save();
 // secondary circuit
                 } elseif ($features["data"][$i]["feature"] == self::HEATPUMP_SECONDARY) {
-                    log::add('viessmannIot', 'debug', 'secondaire trouvé');
-                    $obj = $this->getCmd(null, 'secondaryCircuit');
+                    $obj = $this->getCmd(null, 'secondaryCircuitTemperature');
                     if (!is_object($obj)) {
                         $obj = new viessmannIotCmd();
                         $obj->setName(__('Circuit de délestage', __FILE__));
+                        $obj->setUnite('°C');
                         $obj->setIsVisible(1);
                         $obj->setIsHistorized(0);
                     }
                     $obj->setEqLogic_id($this->getId());
                     $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('secondaryCircuit');
+                    $obj->setSubType('numeric');
+                    $obj->setLogicalId('secondaryCircuitTemperature');
                     $obj->save();
                 } elseif ($features["data"][$i]["feature"] == self::HOT_WATER_STORAGE_TEMPERATURE) {
                     $obj = $this->getCmd(null, 'hotWaterStorageTemperature');
                     if (!is_object($obj)) {
                         $obj = new viessmannIotCmd();
                         $obj->setName(__('Température eau chaude', __FILE__));
+                            $obj->setUnite('°C');
                         $obj->setIsVisible(1);
                         $obj->setIsHistorized(0);
                     }

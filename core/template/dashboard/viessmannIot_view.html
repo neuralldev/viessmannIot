@@ -1968,7 +1968,7 @@
                 $('#idsecondaryCircuit#uid#').html(_options.display_value + '°');
             }
         }
-        jeedom.cmd.update['#idsecondaryCircuit#']({ display_value: '#secondaryCircuit#' });
+        jeedom.cmd.update['#idsecondaryCircuit#']({ display_value: '#secondaryCircuitTemperature#' });
 
         jeedom.cmd.update['#idBoilerTemperatureMain#'] = function (_options) {
             if (_options.display_value == 99) {
