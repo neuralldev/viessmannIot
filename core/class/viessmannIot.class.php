@@ -244,7 +244,12 @@ public const HEATPUMP_ECOMODE ="operating.programs.reduced";
         $features = $viessmannApi->getArrayFeatures();
         $n = count($features["data"]);
         for ($i = 0; $i < $n; $i++) {
+            // debug
+            if ($features["data"][$i]["isEnabled"] == true)
+                log::add('viessmannIot', 'debug', $features["data"][$i]["feature"]);        
+            // debug
             if ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::PUMP_STATUS) && $features["data"][$i]["isEnabled"] == true) {
+                log::add('viessmannIot', 'debug', 'pump status command');
                 $obj = $this->getCmd(null, 'pumpStatus');
                 if (!is_object($obj)) {
                     $obj = new viessmannIotCmd();
@@ -1758,7 +1763,7 @@ public const HEATPUMP_ECOMODE ="operating.programs.reduced";
                 }
             } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STATUS) && $features["data"][$i]["isEnabled"] == true) {
                 log::add('viessmannIot', 'debug', 'heatpump status refresh');
-                $val = $features["data"][$i]["properties"]["active"]["value"];
+                $val = $features["data"][$i]["properties"]["status"]["value"];
                 $obj = $this->getCmd(null, 'pumpStatus');
                 if (is_object($obj)) {
                     $obj->event($val);
