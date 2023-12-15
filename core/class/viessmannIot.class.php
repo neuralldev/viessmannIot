@@ -4377,6 +4377,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $replace["#roomTemperature#"] = $obj->execCmd();
         $replace["#idRoomTemperature#"] = $obj->getId();
 
+        $obj = $this->getCmd(null, 'secondaryCircuitTemperature');
+        $replace["#secondaryCircuitTemperature#"] = $obj->execCmd();
+        $replace["#idsecondaryCircuit#"] = $obj->getId();
+
         $obj = $this->getCmd(null, 'programTemperature');
         $replace["#programTemperature#"] = $obj->execCmd();
         $replace["#idProgramTemperature#"] = $obj->getId();
