@@ -265,6 +265,10 @@
                 class="classValeur#uid# history cursor" data-cmd_id="#idBoilerTemperature#"
                 id="idTemperatureEauRadiateur#uid#"></span></br>
         </div>
+        <div id="showsecondaryCircuit#uid#">
+            <span class="classSousTitre#uid#">Température circuit secondaire</span><span class="classValeur#uid#"
+                id="idsecondaryCircuit#uid#"></span></br>
+        </div>
         <div id="showFrostProtection#uid#">
             <span class="classSousTitre#uid#">Mise hors gel</span><span class="classValeur#uid#"
                 id="idFrostProtection#uid#"></span></br>
@@ -1956,6 +1960,15 @@
             }
         }
         jeedom.cmd.update['#idBoilerTemperature#']({ display_value: '#boilerTemperature#' });
+
+        jeedom.cmd.update['#idsecondaryCircuit#'] = function (_options) {
+            if (_options.display_value == 99) {
+                $('#showsecondaryCircuit#uid#').hide();
+            } else {
+                $('#idsecondaryCircuit#uid#').html(_options.display_value + '°');
+            }
+        }
+        jeedom.cmd.update['#idsecondaryCircuitTemperature#']({ display_value: '#secondaryCircuit#' });
 
         jeedom.cmd.update['#idBoilerTemperatureMain#'] = function (_options) {
             if (_options.display_value == 99) {
