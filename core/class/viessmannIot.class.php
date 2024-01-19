@@ -3676,19 +3676,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $startHoliday = $obj->execCmd();
         if ($this->validateDate($startHoliday, 'Y-m-d') == false) {
             throw new Exception(__('Date de début invalide', __FILE__));
-            return;
         }
 
         $obj = $this->getCmd(null, 'endHoliday');
         $endHoliday = $obj->execCmd();
         if ($this->validateDate($endHoliday, 'Y-m-d') == false) {
             throw new Exception(__('Date de fin invalide', __FILE__));
-            return;
         }
 
         if ($startHoliday > $endHoliday) {
             throw new Exception(__('Date de début postérieure à la date de fin', __FILE__));
-            return;
         }
 
         $viessmannApi = $this->getViessmann();
@@ -3731,19 +3728,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $startHolidayAtHome = $obj->execCmd();
         if ($this->validateDate($startHolidayAtHome, 'Y-m-d') == false) {
             throw new Exception(__('Date de début invalide', __FILE__));
-            return;
         }
 
         $obj = $this->getCmd(null, 'endHolidayAtHome');
         $endHolidayAtHome = $obj->execCmd();
         if ($this->validateDate($endHolidayAtHome, 'Y-m-d') == false) {
             throw new Exception(__('Date de fin invalide', __FILE__));
-            return;
         }
 
         if ($startHolidayAtHome > $endHolidayAtHome) {
             throw new Exception(__('Date de début postérieure à la date de fin', __FILE__));
-            return;
         }
 
         $viessmannApi = $this->getViessmann();
