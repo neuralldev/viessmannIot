@@ -25,6 +25,7 @@ class viessmannIot extends eqLogic
 
     public const HEATING_CIRCUITS = "heating.circuits";
     public const HEATING_BURNERS = "heating.burners";
+    public const HEATING_COMPRESSORS = "heating.compressors";
 
     public const OUTSIDE_TEMPERATURE = "heating.sensors.temperature.outside";
     public const HOT_WATER_STORAGE_TEMPERATURE = "heating.dhw.sensors.temperature.hotWaterStorage";
@@ -530,6 +531,19 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     $obj->setSubType('binary');
                     $obj->setLogicalId('isHeatingBurnerActive');
                     $obj->save();
+                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureCompressor($deviceId, '') && $features["data"][$i]["isEnabled"] == true) {
+                    $obj = $this->getCmd(null, 'isHeatingCompressorActive');
+                    if (!is_object($obj)) {
+                        $obj = new viessmannIotCmd();
+                        $obj->setName(__('Compresseur activé', __FILE__));
+                        $obj->setIsVisible(1);
+                        $obj->setIsHistorized(0);
+                    }
+                    $obj->setEqLogic_id($this->getId());
+                    $obj->setType('info');
+                    $obj->setSubType('binary');
+                    $obj->setLogicalId('isHeatingCompressorActive');
+                    $obj->save();    
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::STANDBY_MODE)) {
                     $obj = $this->getCmd(null, 'isStandbyModeActive');
                     if (!is_object($obj)) {
@@ -1468,6 +1482,58 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     $obj->setSubType('numeric');
                     $obj->setLogicalId('heatingBurnerStarts');
                     $obj->save();
+                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureCompressor($deviceId, self::STATISTICS) && $features["data"][$i]["isEnabled"] == true) {
+                    $obj = $this->getCmd(null, 'heatingCompressorHoursPerDay');
+                    if (!is_object($obj)) {
+                        $obj = new viessmannIotCmd();
+                        $obj->setName(__('Heures fonctionnement compresseur par jour', __FILE__));
+                        $obj->setIsVisible(1);
+                        $obj->setIsHistorized(1);
+                    }
+                    $obj->setEqLogic_id($this->getId());
+                    $obj->setType('info');
+                    $obj->setSubType('numeric');
+                    $obj->setLogicalId('heatingCompressorHoursPerDay');
+                    $obj->save();
+    
+                    $obj = $this->getCmd(null, 'heatingCompressorHours');
+                    if (!is_object($obj)) {
+                        $obj = new viessmannIotCmd();
+                        $obj->setName(__('Heures fonctionnement compresseur', __FILE__));
+                        $obj->setIsVisible(1);
+                        $obj->setIsHistorized(0);
+                    }
+                    $obj->setEqLogic_id($this->getId());
+                    $obj->setType('info');
+                    $obj->setSubType('numeric');
+                    $obj->setLogicalId('heatingCompressorHours');
+                    $obj->save();
+    
+                    $obj = $this->getCmd(null, 'heatingCompressorStartsPerDay');
+                    if (!is_object($obj)) {
+                        $obj = new viessmannIotCmd();
+                        $obj->setName(__('Démarrages du compresseur par jour', __FILE__));
+                        $obj->setIsVisible(1);
+                        $obj->setIsHistorized(0);
+                    }
+                    $obj->setEqLogic_id($this->getId());
+                    $obj->setType('info');
+                    $obj->setSubType('numeric');
+                    $obj->setLogicalId('heatingCompressorStartsPerDay');
+                    $obj->save();
+    
+                    $obj = $this->getCmd(null, 'heatingCompressorStarts');
+                    if (!is_object($obj)) {
+                        $obj = new viessmannIotCmd();
+                        $obj->setName(__('Démarrages du compresseur', __FILE__));
+                        $obj->setIsVisible(1);
+                        $obj->setIsHistorized(0);
+                    }
+                    $obj->setEqLogic_id($this->getId());
+                    $obj->setType('info');
+                    $obj->setSubType('numeric');
+                    $obj->setLogicalId('heatingCompressorStarts');
+                    $obj->save();
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeatureBurner($deviceId, self::MODULATION)) {
                     $obj = $this->getCmd(null, 'heatingBurnerModulation');
                     if (!is_object($obj)) {
@@ -1765,6 +1831,9 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $heatingBurnerHours = -1;
         $heatingBurnerStarts = -1;
 
+        $heatingCompressorHours = -1;
+        $heatingCompressorStarts = -1;
+
         $return = $viessmannApi->getFeatures();
         if (is_string($return)) {
             log::add('viessmannIot', 'warning', $return);
@@ -1830,6 +1899,12 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeatureBurner($deviceId, '')) {
                     $val = $features["data"][$i]["properties"]["active"]["value"];
                     $obj = $this->getCmd(null, 'isHeatingBurnerActive');
+                    if (is_object($obj)) {
+                        $obj->event($val);
+                    }
+                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureCompressor($deviceId, '') && $features["data"][$i]["isEnabled"] == true) {
+                    $val = $features["data"][$i]["properties"]["active"]["value"];
+                    $obj = $this->getCmd(null, 'isHeatingCompressorActive');
                     if (is_object($obj)) {
                         $obj->event($val);
                     }
@@ -2726,6 +2801,19 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     if (is_object($obj)) {
                         $obj->event($val);
                     }
+                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureCompressor($deviceId, self::STATISTICS) && $features["data"][$i]["isEnabled"] == true) {
+                    $val = $features["data"][$i]["properties"]["hours"]["value"];
+                    $heatingCompressorHours = $val;
+                    $obj = $this->getCmd(null, 'heatingCompressorHours');
+                    if (is_object($obj)) {
+                        $obj->event($val);
+                    }
+                    $val = $features["data"][$i]["properties"]["starts"]["value"];
+                    $heatingCompressorStarts = $val;
+                    $obj = $this->getCmd(null, 'heatingCompressorStarts');
+                    if (is_object($obj)) {
+                        $obj->event($val);
+                    }
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeatureBurner($deviceId, self::MODULATION)) {
                     $val = $features["data"][$i]["properties"]["value"]["value"];
                     $obj = $this->getCmd(null, 'heatingBurnerModulation');
@@ -3230,6 +3318,25 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 }
                 $this->setCache('oldHours', $heatingBurnerHours);
                 $this->setCache('oldStarts', $heatingBurnerStarts);
+            }
+
+            if (($heatingCompressorHours != -1) && ($heatingCompressorStarts != -1)) {
+                $oldHours = $this->getCache('oldHoursComp', -1);
+                $oldStarts = $this->getCache('oldStartsComp', -1);
+                if ($oldHours != -1) {
+                    $obj = $this->getCmd(null, 'heatingCompressorHoursPerDay');
+                    if (is_object($obj)) {
+                        $obj->event(round($heatingCompressorHours - $oldHours, 1), $dateVeille);
+                    }
+                }
+                if ($oldStarts != -1) {
+                    $obj = $this->getCmd(null, 'heatingCompressorStartsPerDay');
+                    if (is_object($obj)) {
+                        $obj->event($heatingCompressorStarts - $oldStarts, $dateVeille);
+                    }
+                }
+                $this->setCache('oldHoursComp', $heatingCompressorHours);
+                $this->setCache('oldStartsComp', $heatingCompressorStarts);
             }
 
             if ($outsideMinTemperature != 99) {
@@ -4339,6 +4446,15 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             $replace["#idIsHeatingBurnerActive#"] = "#idIsHeatingBurnerActive#";
         }
 
+        $obj = $this->getCmd(null, 'isHeatingCompressorActive');
+        if (is_object($obj)) {
+            $replace["#isHeatingCompressorActive#"] = $obj->execCmd();
+            $replace["#idIsHeatingCompressorActive#"] = $obj->getId();
+        } else {
+            $replace["#isHeatingCompressorActive#"] = -1;
+            $replace["#idIsHeatingCompressorActive#"] = "#idIsHeatingCompressorActive#";
+        }
+
         $obj = $this->getCmd(null, 'currentError');
         if (is_object($obj)) {
             $replace["#currentError#"] = $obj->execCmd();
@@ -4465,6 +4581,42 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         } else {
             $replace["#heatingBurnerModulation#"] = -1;
             $replace["#idHeatingBurnerModulation#"] = "#idHeatingBurnerModulation#";
+        }
+
+        $obj = $this->getCmd(null, 'heatingCompressorHours');
+        if (is_object($obj)) {
+            $replace["#heatingCompressorHours#"] = $obj->execCmd();
+            $replace["#idHeatingCompressorHours#"] = $obj->getId();
+        } else {
+            $replace["#heatingCompressorHours#"] = -1;
+            $replace["#idHeatingCompressorHours#"] = "#idHeatingCompressorHours#";
+        }
+
+        $obj = $this->getCmd(null, 'heatingCompressorHoursPerDay');
+        if (is_object($obj)) {
+            $replace["#heatingCompressorHoursPerDay#"] = $obj->execCmd();
+            $replace["#idHeatingCompressorHoursPerDay#"] = $obj->getId();
+        } else {
+            $replace["#heatingCompressorHoursPerDay#"] = -1;
+            $replace["#idHeatingCompressorHoursPerDay#"] = "#idHeatingCompressorHoursPerDay#";
+        }
+
+        $obj = $this->getCmd(null, 'heatingCompressorStarts');
+        if (is_object($obj)) {
+            $replace["#heatingCompressorStarts#"] = $obj->execCmd();
+            $replace["#idHeatingCompressorStarts#"] = $obj->getId();
+        } else {
+            $replace["#heatingCompressorStarts#"] = -1;
+            $replace["#idHeatingCompressorStarts#"] = "#idHeatingCompressorStarts#";
+        }
+
+        $obj = $this->getCmd(null, 'heatingCompressorStartsPerDay');
+        if (is_object($obj)) {
+            $replace["#heatingCompressorStartsPerDay#"] = $obj->execCmd();
+            $replace["#idHeatingCompressorStartsPerDay#"] = $obj->getId();
+        } else {
+            $replace["#heatingCompressorStartsPerDay#"] = -1;
+            $replace["#idHeatingCompressorStartsPerDay#"] = "#idHeatingCompressorStartsPerDay#";
         }
 
         $obj = $this->getCmd(null, 'slope');
@@ -5295,7 +5447,13 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         }
         return self::HEATING_BURNERS . "." . $deviceId . "." . $feature;
     }
-
+    private function buildFeatureCompressor($deviceId, $feature)
+    {
+        if ($feature == '') {
+            return self::HEATING_COMPRESSORS . "." . $deviceId;
+        }
+        return self::HEATING_COMPRESSORS . "." . $deviceId . "." . $feature;
+    }
     // Lire les températures intérieures
     //
     public function lireTempInt($startDate, $endDate, $dynamique)
