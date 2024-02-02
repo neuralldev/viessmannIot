@@ -329,11 +329,11 @@
         <table id="table_cmd" class="table table-bordered table-condensed">
           <thead>
             <tr>
-              <th>{{Nom}}</th>
+              <th style="min-width:200px;width:350px;">{{Nom}}</th>
               <th>{{Type}}</th>
-              <th>{{Options}}</th>
+              <th style="min-width:260px;">{{Options}}</th>
               <th>{{Etat}}</th>
-              <th>{{Actions}}</th>
+              <th style="min-width:80px;width:200px;">{{Actions}}</th>
             </tr>
           </thead>
           <tbody>
