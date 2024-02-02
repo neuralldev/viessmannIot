@@ -331,6 +331,8 @@
             <tr>
               <th>{{Nom}}</th>
               <th>{{Type}}</th>
+              <th>{{Options}}</th>
+              <th>{{Etat}}</th>
               <th>{{Actions}}</th>
             </tr>
           </thead>

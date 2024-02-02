@@ -68,9 +68,21 @@ function addCmdToTable(_cmd) {
     tr += '</td>';
     tr += '</tr>';
     $('#table_cmd tbody').append(tr);
-    $('#table_cmd tbody tr:last').setValues(_cmd, '.cmdAttr');
-    if (isset(_cmd.type)) {
-        $('#table_cmd tbody tr:last .cmdAttr[data-l1key=type]').value(init(_cmd.type));
-    }
-    jeedom.cmd.changeType($('#table_cmd tbody tr:last'), init(_cmd.subType));
+  //  $('#table_cmd tbody tr:last').setValues(_cmd, '.cmdAttr');
+  //  if (isset(_cmd.type)) {
+  //      $('#table_cmd tbody tr:last .cmdAttr[data-l1key=type]').value(init(_cmd.type));
+  //  }
+  //  jeedom.cmd.changeType($('#table_cmd tbody tr:last'), init(_cmd.subType));
+  var tr = $('#table_cmd tbody tr').last();
+  jeedom.eqLogic.buildSelectCmd({
+       id:  $('.eqLogicAttr[data-l1key=id]').value(),
+       filter: {type: 'info'},
+       error: function (error) {
+             $('#div_alert').showAlert({message: error.message, level: 'danger'});
+       },
+       success: function (result) {
+         tr.find('.cmdAttr[data-l1key=value]').append(result);
+         tr.setValues(_cmd, '.cmdAttr');
+         jeedom.cmd.changeType(tr, init(_cmd.subType));
+       }
 }
