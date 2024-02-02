@@ -329,6 +329,7 @@
         <table id="table_cmd" class="table table-bordered table-condensed">
           <thead>
             <tr>
+              <th>{{ID}}</th>
               <th>{{Nom}}</th>
               <th>{{Type}}</th>
               <th>{{Options}}</th>
