@@ -329,6 +329,7 @@
         <table id="table_cmd" class="table table-bordered table-condensed">
           <thead>
             <tr>
+              <th class="hidden-xs" style="min-width:50px;width:70px;">ID</th>
               <th style="min-width:200px;width:350px;">{{Nom}}</th>
               <th>{{Type}}</th>
               <th style="min-width:260px;">{{Options}}</th>
