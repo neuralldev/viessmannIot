@@ -3888,26 +3888,18 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             $replace["#idIsScheduleHolidayAtHomeProgram#"] = "#idIsScheduleHolidayAtHomeProgram#";
         }
 
-        $temp = '';
-        for ($ot = 25; $ot >= -20; $ot--) {
-            if ($temp !== '') {
-                $temp = $temp . ',';
-            }
-            $temp = $temp . "'" . $ot . "'";
-        }
+        $temp = implode(',', array_map(function ($ot) {
+            return "'$ot'";
+        }, range(25, -20, -5)));
         $replace["#range_temperature#"] = $temp;
 
         $obj = $this->getCmd(null, 'curve');
         $replace["#curve#"] = $obj->execCmd();
         $replace["#idCurve#"] = $obj->getId();
 
-        $temp = '';
-        for ($ot = 25; $ot >= -20; $ot -= 5) {
-            if ($temp !== '') {
-                $temp = $temp . ',';
-            }
-            $temp = $temp . "'" . $ot . "'";
-        }
+        $temp = implode(',', array_map(function ($ot) {
+            return "'$ot'";
+        }, range(25, -20, -5)));
         $replace["#range_temp#"] = $temp;
 
         $startTime = date("Y-m-d H:i:s", time() - 8 * 24 * 60 * 60);
@@ -3916,12 +3908,8 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $outsideMinTemperature = $this->getCache('outsideMinTemperature', -1);
         $outsideMaxTemperature = $this->getCache('outsideMaxTemperature', 1);
 
-        $listeMinTemp = array();
-        $listeMaxTemp = array();
-        for ($i = 0; $i < 8; $i++) {
-            $listeMinTemp[] = -99;
-            $listeMaxTemp[] = 99;
-        }
+        $listeMinTemp = array_fill(0, 8, -99);
+        $listeMaxTemp = array_fill(0, 8, 99);
 
         $listeMinTemp[7] = $outsideMinTemperature;
         $listeMaxTemp[7] = $outsideMaxTemperature;
@@ -3930,24 +3918,18 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         if (is_object($cmd)) {
             $histoGraphe = $cmd->getHistory($startTime, $endTime);
             foreach ($histoGraphe as $row) {
-                $value = $row->getValue();
-                $datetime = $row->getDatetime();
-                $ts = strtotime($datetime);
-                $i = time() - $ts;
-                $i = 7 - floor($i / (24 * 60 * 60));
-                $listeMinTemp[$i] = round($value, 1);
+                $value = round($row->getValue(), 1);
+                $i = 7 - floor((time() - strtotime($row->getDatetime())) / (24 * 60 * 60));
+                $listeMinTemp[$i] = $value;
             }
         }
         $cmd = $this->getCmd(null, 'outsideMaxTemperature');
         if (is_object($cmd)) {
             $histoGraphe = $cmd->getHistory($startTime, $endTime);
             foreach ($histoGraphe as $row) {
-                $value = $row->getValue();
-                $datetime = $row->getDatetime();
-                $ts = strtotime($datetime);
-                $i = time() - $ts;
-                $i = 7 - floor($i / (24 * 60 * 60));
-                $listeMaxTemp[$i] = round($value, 1);
+                $value = round($row->getValue(), 1);
+                $i = 7 - floor((time() - strtotime($row->getDatetime())) / (24 * 60 * 60));
+                $listeMaxTemp[$i] = $value;
             }
         }
         $datasMinMax = '';
@@ -3963,18 +3945,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $maintenant = time();
         $jour = date("N", $maintenant) - 1;
-        $joursMinMax = '';
+        $joursMinMax = implode(',', array_map(function($j) use ($jours) {
+            return "'" . $jours[$j] . "'";
+        }, range($jour, $jour - 7, -1)));
 
-        for ($i = 0; $i < 8; $i++) {
-            if ($jour < 0) {
-                $jour = 6;
-            }
-            if ($joursMinMax !== '') {
-                $joursMinMax = $joursMinMax . ',';
-            }
-            $joursMinMax = $joursMinMax . "'" . $jours[$jour] . "'";
-            $jour--;
-        }
         $replace["#joursMinMax#"] = $joursMinMax;
 
         $obj = $this->getCmd(null, 'histoTemperatureCsg');
