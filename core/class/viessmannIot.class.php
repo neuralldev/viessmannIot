@@ -239,1486 +239,344 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $features = $viessmannApi->getArrayFeatures();
         $n = count($features["data"]);
-        // debug
-        if ($n > 0)
-            log::add('viessmannIot', 'debug', "parse " . $n . " features");
-        // debug
-
-        for ($i = 0; $i < $n; $i++) {
-            if ($features["data"][$i]["isEnabled"] == true) {
-                log::add('viessmannIot', 'debug', $features["data"][$i]["feature"]);
-                if ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::PUMP_STATUS)) {
-                    $obj = $this->getCmd(null, 'pumpStatus');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Statut circulateur', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('pumpStatus');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATPUMP_STATUS)) {
-                    $obj = $this->getCmd(null, 'pumpStatus');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Statut circulateur', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('pumpStatus');
-                    $obj->save();
-// secondary circuit
-                } elseif ($features["data"][$i]["feature"] == self::HEATPUMP_SECONDARY) {
-                    $obj = $this->getCmd(null, 'secondaryCircuitTemperature');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Circuit de délestage', __FILE__));
-                        $obj->setUnite('°C');
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('secondaryCircuitTemperature');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HOT_WATER_STORAGE_TEMPERATURE) {
-                    $obj = $this->getCmd(null, 'hotWaterStorageTemperature');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Température eau chaude', __FILE__));
-                            $obj->setUnite('°C');
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('hotWaterStorageTemperature');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::DHW_TEMPERATURE) {
-                    $objDhw = $this->getCmd(null, 'dhwTemperature');
-                    if (!is_object($objDhw)) {
-                        $objDhw = new viessmannIotCmd();
-                        $objDhw->setName(__('Consigne eau chaude', __FILE__));
-                        $objDhw->setIsVisible(1);
-                        $objDhw->setIsHistorized(0);
-                    }
-                    $objDhw->setEqLogic_id($this->getId());
-                    $objDhw->setType('info');
-                    $objDhw->setSubType('numeric');
-                    $objDhw->setLogicalId('dhwTemperature');
-                    $objDhw->setConfiguration('minValue', 10);
-                    $objDhw->setConfiguration('maxValue', 60);
-                    $objDhw->save();
-
-                    if (isset($features["data"][$i]["commands"]["setTargetTemperature"])) {
-                        $obj = $this->getCmd(null, 'dhwSlider');
-                        if (!is_object($obj)) {
-                            $obj = new viessmannIotCmd();
-                            $obj->setUnite('°C');
-                            $obj->setName(__('Slider consigne eau chaude ', __FILE__));
-                            $obj->setIsVisible(1);
-                            $obj->setIsHistorized(0);
-                        }
-                        $obj->setEqLogic_id($this->getId());
-                        $obj->setType('action');
-                        $obj->setSubType('slider');
-                        $obj->setLogicalId('dhwSlider');
-                        $obj->setValue($objDhw->getId());
-                        $obj->setConfiguration('minValue', 10);
-                        $obj->setConfiguration('maxValue', 60);
-                        $obj->save();
-                    }
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::ACTIVE_MODE)) {
-                    $obj = $this->getCmd(null, 'activeMode');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Mode activé', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('activeMode');
-                    $obj->save();
-
-                    $nc = count($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"]);
-                    for ($j = 0; $j < $nc; $j++) {
-                        if ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'standby') {
-                            $obj = $this->getCmd(null, 'modeStandby');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode mise en veille', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeStandby');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'auto') {
-                            $obj = $this->getCmd(null, 'modeAuto');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode auto', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeAuto');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'heating') {
-                            $obj = $this->getCmd(null, 'modeHeating');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode chauffage', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeHeating');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'cooling') {
-                            $obj = $this->getCmd(null, 'modeCooling');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode refroidissement', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeCooling');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'heatingCooling') {
-                            $obj = $this->getCmd(null, 'modeHeatingCooling');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode chauffage et refroidissement', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeHeatingCooling');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'testMode') {
-                            $obj = $this->getCmd(null, 'modeTestMode');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode test', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeTestMode');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'dhw') {
-                            $obj = $this->getCmd(null, 'modeDhw');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode eau chaude', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeDhw');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'dhwAndHeating') {
-                            $obj = $this->getCmd(null, 'modeDhwAndHeating');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode eau chaude et chauffage', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeDhwAndHeating');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        }
-                    }
-                } elseif ($features["data"][$i]["feature"] == self::ACTIVE_DHW_MODE) {
-                    $obj = $this->getCmd(null, 'activeDhwMode');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Mode eau chaude activé', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('activeDhwMode');
-                    $obj->save();
-
-                    $nc = count($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"]);
-                    for ($j = 0; $j < $nc; $j++) {
-                        if ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'balanced') {
-                            $obj = $this->getCmd(null, 'modeDhwBalanced');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode dhw activé', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeDhwBalanced');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'comfort') {
-                            $obj = $this->getCmd(null, 'modeDhwComfort');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode dhw comfort', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeDhwComfort');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'eco') {
-                            $obj = $this->getCmd(null, 'modeDhwEco');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode dhw économique', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeDhwEco');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        } elseif ($features["data"][$i]["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"][$j] == 'off') {
-                            $obj = $this->getCmd(null, 'modeDhwOff');
-                            if (!is_object($obj)) {
-                                $obj = new viessmannIotCmd();
-                                $obj->setName(__('Mode dhw arrêt', __FILE__));
-                            }
-                            $obj->setEqLogic_id($this->getId());
-                            $obj->setLogicalId('modeDhwOff');
-                            $obj->setType('action');
-                            $obj->setSubType('other');
-                            $obj->save();
-                        }
-                    }
-
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::ACTIVE_PROGRAM)) {
-                    $obj = $this->getCmd(null, 'activeProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Programme activé', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('activeProgram');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureBurner($deviceId, '')) {
-                    $obj = $this->getCmd(null, 'isHeatingBurnerActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Bruleur activé', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isHeatingBurnerActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureCompressor($deviceId, '') && $features["data"][$i]["isEnabled"] == true) {
-                    $obj = $this->getCmd(null, 'isHeatingCompressorActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Compresseur activé', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isHeatingCompressorActive');
-                    $obj->save();    
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::STANDBY_MODE)) {
-                    $obj = $this->getCmd(null, 'isStandbyModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Veille activée', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isStandbyModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATING_MODE)) {
-                    $obj = $this->getCmd(null, 'isHeatingModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Chauffage activé', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isHeatingModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::DHW_MODE)) {
-                    $obj = $this->getCmd(null, 'isDhwModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Eau chaude activée', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isDhwModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::DHW_AND_HEATING_MODE)) {
-                    $obj = $this->getCmd(null, 'isDhwAndHeatingModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Eau chaude et chauffage activés', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isDhwAndHeatingModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::COOLING_MODE)) {
-                    $obj = $this->getCmd(null, 'isCoolingModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Refroidissement activé', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isCoolingModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::DHW_AND_HEATING_COOLING_MODE)) {
-                    $obj = $this->getCmd(null, 'isDhwAndHeatingCoolingModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Eau chaude, chauffage et refroidissement activés', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isDhwAndHeatingCoolingModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATING_COOLING_MODE)) {
-                    $obj = $this->getCmd(null, 'isHeatingCoolingModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Chauffage et refroidissement activés', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isHeatingCoolingModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::NORMAL_STANDBY_MODE)) {
-                    $obj = $this->getCmd(null, 'isNormalStandbyModeActive');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Veille normale activée', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isNormalStandbyModeActive');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::SENSORS_TEMPERATURE_SUPPLY)) {
-                    $obj = $this->getCmd(null, 'supplyProgramTemperature');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Température de départ', __FILE__));
-                        $obj->setUnite('°C');
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('supplyProgramTemperature');
-                    $obj->save();
-                } elseif (
-                    ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM) ||
-                        $features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM_HEATING))
-
-                ) {
-
-                    $this->setConfiguration('comfortProgram', $features["data"][$i]["feature"])->save();
-
-                    $objComfort = $this->getCmd(null, 'comfortProgramTemperature');
-                    if (!is_object($objComfort)) {
-                        $objComfort = new viessmannIotCmd();
-                        $objComfort->setName(__('Consigne de confort', __FILE__));
-                        $objComfort->setUnite('°C');
-                        $objComfort->setIsVisible(1);
-                        $objComfort->setIsHistorized(0);
-                    }
-                    $objComfort->setEqLogic_id($this->getId());
-                    $objComfort->setType('info');
-                    $objComfort->setSubType('numeric');
-                    $objComfort->setLogicalId('comfortProgramTemperature');
-                    $objComfort->setConfiguration('minValue', 3);
-                    $objComfort->setConfiguration('maxValue', 37);
-                    $objComfort->save();
-
-                    $obj = $this->getCmd(null, 'comfortProgramSlider');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setUnite('°C');
-                        $obj->setName(__('Slider consigne de confort', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('action');
-                    $obj->setSubType('slider');
-                    $obj->setLogicalId('comfortProgramSlider');
-                    $obj->setValue($objComfort->getId());
-                    $obj->setConfiguration('minValue', 3);
-                    $obj->setConfiguration('maxValue', 37);
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'isActivateComfortProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Programme comfort actif', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isActivateComfortProgram');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'activateComfortProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Activer programme confort', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('activateComfortProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'deActivateComfortProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Désactiver programme confort', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('deActivateComfortProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-                } elseif (
-                    ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::NORMAL_PROGRAM) ||
-                        $features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::NORMAL_PROGRAM_HEATING))
-
-                ) {
-
-                    $this->setConfiguration('normalProgram', $features["data"][$i]["feature"])->save();
-
-                    $objNormal = $this->getCmd(null, 'normalProgramTemperature');
-                    if (!is_object($objNormal)) {
-                        $objNormal = new viessmannIotCmd();
-                        $objNormal->setName(__('Consigne normale', __FILE__));
-                        $objNormal->setUnite('°C');
-                        $objNormal->setIsVisible(1);
-                        $objNormal->setIsHistorized(0);
-                    }
-                    $objNormal->setEqLogic_id($this->getId());
-                    $objNormal->setType('info');
-                    $objNormal->setSubType('numeric');
-                    $objNormal->setLogicalId('normalProgramTemperature');
-                    $objNormal->setConfiguration('minValue', 3);
-                    $objNormal->setConfiguration('maxValue', 37);
-                    $objNormal->save();
-
-                    $obj = $this->getCmd(null, 'normalProgramSlider');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setUnite('°C');
-                        $obj->setName(__('Slider consigne normale', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('action');
-                    $obj->setSubType('slider');
-                    $obj->setLogicalId('normalProgramSlider');
-                    $obj->setValue($objNormal->getId());
-                    $obj->setConfiguration('minValue', 3);
-                    $obj->setConfiguration('maxValue', 37);
-                    $obj->save();
-                } elseif (
-                    ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::REDUCED_PROGRAM) ||
-                        $features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::REDUCED_PROGRAM_HEATING))
-
-                ) {
-
-                    $this->setConfiguration('reducedProgram', $features["data"][$i]["feature"])->save();
-
-                    $objReduced = $this->getCmd(null, 'reducedProgramTemperature');
-                    if (!is_object($objReduced)) {
-                        $objReduced = new viessmannIotCmd();
-                        $objReduced->setName(__('Consigne réduite', __FILE__));
-                        $objReduced->setUnite('°C');
-                        $objReduced->setIsVisible(1);
-                        $objReduced->setIsHistorized(0);
-                    }
-                    $objReduced->setEqLogic_id($this->getId());
-                    $objReduced->setType('info');
-                    $objReduced->setSubType('numeric');
-                    $objReduced->setLogicalId('reducedProgramTemperature');
-                    $objReduced->setConfiguration('minValue', 3);
-                    $objReduced->setConfiguration('maxValue', 37);
-                    $objReduced->save();
-
-                    $obj = $this->getCmd(null, 'reducedProgramSlider');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setUnite('°C');
-                        $obj->setName(__('Slider consigne réduite', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('action');
-                    $obj->setSubType('slider');
-                    $obj->setLogicalId('reducedProgramSlider');
-                    $obj->setValue($objReduced->getId());
-                    $obj->setConfiguration('minValue', 3);
-                    $obj->setConfiguration('maxValue', 37);
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::ECO_PROGRAM)) {
-                    $obj = $this->getCmd(null, 'isActivateEcoProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Programme éco actif', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isActivateEcoProgram');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'activateEcoProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Activer programme éco', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('activateEcoProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'deActivateEcoProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Désactiver programme éco', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('deActivateEcoProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::FORCED_LAST_FROM_SCHEDULE)) {
-                    $obj = $this->getCmd(null, 'isActivateLastSchedule');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Prolonger programme actif', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isActivateLastSchedule');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'activateLastSchedule');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Activer prolonger programme', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('activateLastSchedule');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'deActivateLastSchedule');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Désactiver prolonger programme', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('deActivateLastSchedule');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_DHW_ONETIMECHARGE) {
-                    $obj = $this->getCmd(null, 'isOneTimeDhwCharge');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Forcer Eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isOneTimeDhwCharge');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'startOneTimeDhwCharge');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Activer demande eau chaude', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('startOneTimeDhwCharge');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'stopOneTimeDhwCharge');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Désactiver demande eau chaude', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('stopOneTimeDhwCharge');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATING_CURVE)) {
-                    $objSlope = $this->getCmd(null, 'slope');
-                    if (!is_object($objSlope)) {
-                        $objSlope = new viessmannIotCmd();
-                        $objSlope->setName(__('Pente', __FILE__));
-                        $objSlope->setIsVisible(1);
-                        $objSlope->setIsHistorized(0);
-                    }
-                    $objSlope->setEqLogic_id($this->getId());
-                    $objSlope->setType('info');
-                    $objSlope->setSubType('numeric');
-                    $objSlope->setLogicalId('slope');
-                    $objSlope->setConfiguration('minValue', 0.2);
-                    $objSlope->setConfiguration('maxValue', 3.5);
-                    $objSlope->save();
-
-                    $objShift = $this->getCmd(null, 'shift');
-                    if (!is_object($objShift)) {
-                        $objShift = new viessmannIotCmd();
-                        $objShift->setName(__('Parallèle', __FILE__));
-                        $objShift->setIsVisible(1);
-                        $objShift->setIsHistorized(0);
-                    }
-                    $objShift->setEqLogic_id($this->getId());
-                    $objShift->setType('info');
-                    $objShift->setSubType('numeric');
-                    $objShift->setLogicalId('shift');
-                    $objShift->setConfiguration('minValue', -13);
-                    $objShift->setConfiguration('maxValue', 40);
-                    $objShift->save();
-
-                    $obj = $this->getCmd(null, 'slopeSlider');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Slider pente', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('action');
-                    $obj->setSubType('slider');
-                    $obj->setLogicalId('slopeSlider');
-                    $obj->setValue($objSlope->getId());
-                    $obj->setConfiguration('minValue', 0.2);
-                    $obj->setConfiguration('maxValue', 3.5);
-                    $optParam = $obj->getDisplay('parameters');
-                    if (!is_array($optParam)) {
-                        $optParam = array();
-                    }
-                    $optParam['step'] = 0.1;
-                    $obj->setDisplay('parameters', $optParam);
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'shiftSlider');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Slider parallèle', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('action');
-                    $obj->setSubType('slider');
-                    $obj->setLogicalId('shiftSlider');
-                    $obj->setValue($objShift->getId());
-                    $obj->setConfiguration('minValue', -13);
-                    $obj->setConfiguration('maxValue', 40);
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_DHW_SCHEDULE) {
-                    $obj = $this->getCmd(null, 'dhwSchedule');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Programmation eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwSchedule');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'setDhwSchedule');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Set Prog Eau Chaude', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('setDhwSchedule');
-                    $obj->setType('action');
-                    $obj->setSubType('message');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATING_SCHEDULE)) {
-                    $obj = $this->getCmd(null, 'heatingSchedule');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Programmation chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingSchedule');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'setHeatingSchedule');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Set Prog Chauffage', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('setHeatingSchedule');
-                    $obj->setType('action');
-                    $obj->setSubType('message');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATING_FROSTPROTECTION)) {
-                    $obj = $this->getCmd(null, 'frostProtection');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Protection gel', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('frostProtection');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_BOILER_SENSORS_TEMPERATURE) {
-                    $obj = $this->getCmd(null, 'boilerTemperature');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Température eau radiateur', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('boilerTemperature');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_BOILER_SENSORS_TEMPERATURE_MAIN) {
-                    $obj = $this->getCmd(null, 'boilerTemperatureMain');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Température chaudière', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('boilerTemperatureMain');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::PRESSURE_SUPPLY) {
-                    $obj = $this->getCmd(null, 'pressureSupply');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Pression installation', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('pressureSupply');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::SOLAR_TEMPERATURE) {
-                    $obj = $this->getCmd(null, 'solarTemperature');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Température panneaux solaires', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('solarTemperature');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::SOLAR_DHW_TEMPERATURE) {
-                    $obj = $this->getCmd(null, 'solarDhwTemperature');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Température eau chaude panneaux solaires', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('solarDhwTemperature');
-                    $obj->save();
-                } elseif (
-                    ($features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_DHW ||
-                        $features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_SUMMARY_DHW ||
-                        $features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_HEATING ||
-                        $features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_SUMMARY_DHW ||
-                        $features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_HEATING ||
-                        $features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_SUMMARY_HEATING)
-                ) {
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation journalière gaz eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwGazConsumptionDay');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionWeek');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation hebdomadaire gaz eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwGazConsumptionWeek');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionMonth');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation mensuelle gaz eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwGazConsumptionMonth');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionYear');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation annuelle gaz eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwGazConsumptionYear');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation journalière gaz chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingGazConsumptionDay');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionWeek');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation hebdomadaire gaz chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingGazConsumptionWeek');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionMonth');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation mensuelle gaz chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingGazConsumptionMonth');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionYear');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation annuelle gaz chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingGazConsumptionYear');
-                    $obj->save();
-                } elseif (
-                    ($features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_DHW ||
-                        $features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_SUMMARY_DHW ||
-                        $features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_HEATING ||
-                        $features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_SUMMARY_HEATING ||
-                        $features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_TOTAL ||
-                        $features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_SUMMARY_TOTAL)
-
-                ) {
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation journalière électrique eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwPowerConsumptionDay');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionWeek');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation hebdomadaire électrique eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwPowerConsumptionWeek');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionMonth');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation mensuelle électrique eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwPowerConsumptionMonth');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionYear');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation annuelle électrique eau chaude', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('dhwPowerConsumptionYear');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation journalière électrique chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingPowerConsumptionDay');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionWeek');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation hebdomadaire électrique chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingPowerConsumptionWeek');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionMonth');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation mensuelle électrique chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingPowerConsumptionMonth');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionYear');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation annuelle électrique chauffage', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('heatingPowerConsumptionYear');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation journalière électrique totale', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('totalPowerConsumptionDay');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionWeek');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation hebdomadaire électrique totale', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('totalPowerConsumptionWeek');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionMonth');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation mensuelle électrique totale', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('totalPowerConsumptionMonth');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionYear');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Consommation annuelle électrique totale', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('totalPowerConsumptionYear');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_SERVICE_TIMEBASED) {
-                    $obj = $this->getCmd(null, 'lastServiceDate');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date dernier entretien', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('lastServiceDate');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'serviceInterval');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Intervalle entretien', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('serviceInterval');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'monthSinceService');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Mois entretien', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('monthSinceService');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureBurner($deviceId, self::STATISTICS)) {
-                    $obj = $this->getCmd(null, 'heatingBurnerHoursPerDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Heures fonctionnement brûleur par jour', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(1);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingBurnerHoursPerDay');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingBurnerHours');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Heures fonctionnement brûleur', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingBurnerHours');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingBurnerStartsPerDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Démarrages du brûleur par jour', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingBurnerStartsPerDay');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'heatingBurnerStarts');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Démarrages du brûleur', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingBurnerStarts');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureCompressor($deviceId, self::STATISTICS) && $features["data"][$i]["isEnabled"] == true) {
-                    $obj = $this->getCmd(null, 'heatingCompressorHoursPerDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Heures fonctionnement compresseur par jour', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(1);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingCompressorHoursPerDay');
-                    $obj->save();
-    
-                    $obj = $this->getCmd(null, 'heatingCompressorHours');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Heures fonctionnement compresseur', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingCompressorHours');
-                    $obj->save();
-    
-                    $obj = $this->getCmd(null, 'heatingCompressorStartsPerDay');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Démarrages du compresseur par jour', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingCompressorStartsPerDay');
-                    $obj->save();
-    
-                    $obj = $this->getCmd(null, 'heatingCompressorStarts');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Démarrages du compresseur', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingCompressorStarts');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == $this->buildFeatureBurner($deviceId, self::MODULATION)) {
-                    $obj = $this->getCmd(null, 'heatingBurnerModulation');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Modulation de puissance', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('numeric');
-                    $obj->setLogicalId('heatingBurnerModulation');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HOLIDAY_PROGRAM) {
-                    $obj = $this->getCmd(null, 'startHoliday');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date début', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('startHoliday');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'endHoliday');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date fin', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('endHoliday');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'startHolidayText');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date Début texte', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('startHolidayText');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'endHolidayText');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date Fin texte', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('endHolidayText');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'scheduleHolidayProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Activer programme vacances', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('scheduleHolidayProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'unscheduleHolidayProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Désactiver programme vacances', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('unscheduleHolidayProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'isScheduleHolidayProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Programme vacances actif', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isScheduleHolidayProgram');
-                    $obj->save();
-                } elseif ($features["data"][$i]["feature"] == self::HOLIDAY_AT_HOME_PROGRAM) {
-                    $obj = $this->getCmd(null, 'startHolidayAtHome');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date début maison', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('startHolidayAtHome');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'endHolidayAtHome');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date fin maison', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('string');
-                    $obj->setLogicalId('endHolidayAtHome');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'startHolidayAtHomeText');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date Début maison texte', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('startHolidayAtHomeText');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'endHolidayAtHomeText');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Date Fin maison texte', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('endHolidayAtHomeText');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'scheduleHolidayAtHomeProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Activer programme vacances maison', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('scheduleHolidayAtHomeProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'unscheduleHolidayAtHomeProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Désactiver programme vacances maison', __FILE__));
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setLogicalId('unscheduleHolidayAtHomeProgram');
-                    $obj->setType('action');
-                    $obj->setSubType('other');
-                    $obj->save();
-
-                    $obj = $this->getCmd(null, 'isScheduleHolidayAtHomeProgram');
-                    if (!is_object($obj)) {
-                        $obj = new viessmannIotCmd();
-                        $obj->setName(__('Programme vacances maison actif', __FILE__));
-                        $obj->setIsVisible(1);
-                        $obj->setIsHistorized(0);
-                    }
-                    $obj->setEqLogic_id($this->getId());
-                    $obj->setType('info');
-                    $obj->setSubType('binary');
-                    $obj->setLogicalId('isScheduleHolidayAtHomeProgram');
-                    $obj->save();
-                }
+        log::add('viessmannIot', 'debug', "parse " . $n . " features");
+
+        foreach ($features["data"] as $feature) {
+            if ($feature["isEnabled"]) {
+                log::add('viessmannIot', 'debug', $feature["feature"]);
+                $this->createCommand($feature, $circuitId, $deviceId);
             }
-
         }
 
         log::add('viessmannIot', 'info', 'Commandes (re)créées');
+    }
+
+    private function createCommand($feature, $circuitId, $deviceId)
+    {
+        switch ($feature["feature"]) {
+            case $this->buildFeature($circuitId, self::PUMP_STATUS):
+            case $this->buildFeature($circuitId, self::HEATPUMP_STATUS):
+                $this->createInfoCommand('pumpStatus', 'Statut circulateur', 'string');
+                break;
+            case self::HEATPUMP_SECONDARY:
+                $this->createInfoCommand('secondaryCircuitTemperature', 'Circuit de délestage', 'numeric', '°C');
+                break;
+            case self::HOT_WATER_STORAGE_TEMPERATURE:
+                $this->createInfoCommand('hotWaterStorageTemperature', 'Température eau chaude', 'numeric', '°C');
+                break;
+            case self::DHW_TEMPERATURE:
+                $this->createDhwTemperatureCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::ACTIVE_MODE):
+                $this->createActiveModeCommands($feature);
+                break;
+            case self::ACTIVE_DHW_MODE:
+                $this->createActiveDhwModeCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::ACTIVE_PROGRAM):
+                $this->createInfoCommand('activeProgram', 'Programme activé', 'string');
+                break;
+            case $this->buildFeatureBurner($deviceId, ''):
+                $this->createInfoCommand('isHeatingBurnerActive', 'Bruleur activé', 'binary');
+                break;
+            case $this->buildFeatureCompressor($deviceId, ''):
+                $this->createInfoCommand('isHeatingCompressorActive', 'Compresseur activé', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::STANDBY_MODE):
+                $this->createInfoCommand('isStandbyModeActive', 'Veille activée', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::HEATING_MODE):
+                $this->createInfoCommand('isHeatingModeActive', 'Chauffage activé', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::DHW_MODE):
+                $this->createInfoCommand('isDhwModeActive', 'Eau chaude activée', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::DHW_AND_HEATING_MODE):
+                $this->createInfoCommand('isDhwAndHeatingModeActive', 'Eau chaude et chauffage activés', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::COOLING_MODE):
+                $this->createInfoCommand('isCoolingModeActive', 'Refroidissement activé', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::DHW_AND_HEATING_COOLING_MODE):
+                $this->createInfoCommand('isDhwAndHeatingCoolingModeActive', 'Eau chaude, chauffage et refroidissement activés', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::HEATING_COOLING_MODE):
+                $this->createInfoCommand('isHeatingCoolingModeActive', 'Chauffage et refroidissement activés', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::NORMAL_STANDBY_MODE):
+                $this->createInfoCommand('isNormalStandbyModeActive', 'Veille normale activée', 'binary');
+                break;
+            case $this->buildFeature($circuitId, self::SENSORS_TEMPERATURE_SUPPLY):
+                $this->createInfoCommand('supplyProgramTemperature', 'Température de départ', 'numeric', '°C');
+                break;
+            case $this->buildFeature($circuitId, self::COMFORT_PROGRAM):
+            case $this->buildFeature($circuitId, self::COMFORT_PROGRAM_HEATING):
+                $this->createComfortProgramCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::NORMAL_PROGRAM):
+            case $this->buildFeature($circuitId, self::NORMAL_PROGRAM_HEATING):
+                $this->createNormalProgramCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::REDUCED_PROGRAM):
+            case $this->buildFeature($circuitId, self::REDUCED_PROGRAM_HEATING):
+                $this->createReducedProgramCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::ECO_PROGRAM):
+                $this->createEcoProgramCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::FORCED_LAST_FROM_SCHEDULE):
+                $this->createLastScheduleCommands($feature);
+                break;
+            case self::HEATING_DHW_ONETIMECHARGE:
+                $this->createOneTimeDhwChargeCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::HEATING_CURVE):
+                $this->createHeatingCurveCommands($feature);
+                break;
+            case self::HEATING_DHW_SCHEDULE:
+                $this->createDhwScheduleCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::HEATING_SCHEDULE):
+                $this->createHeatingScheduleCommands($feature);
+                break;
+            case $this->buildFeature($circuitId, self::HEATING_FROSTPROTECTION):
+                $this->createInfoCommand('frostProtection', 'Protection gel', 'string');
+                break;
+            case self::HEATING_BOILER_SENSORS_TEMPERATURE:
+                $this->createInfoCommand('boilerTemperature', 'Température eau radiateur', 'numeric');
+                break;
+            case self::HEATING_BOILER_SENSORS_TEMPERATURE_MAIN:
+                $this->createInfoCommand('boilerTemperatureMain', 'Température chaudière', 'numeric');
+                break;
+            case self::PRESSURE_SUPPLY:
+                $this->createInfoCommand('pressureSupply', 'Pression installation', 'numeric');
+                break;
+            case self::SOLAR_TEMPERATURE:
+                $this->createInfoCommand('solarTemperature', 'Température panneaux solaires', 'numeric');
+                break;
+            case self::SOLAR_DHW_TEMPERATURE:
+                $this->createInfoCommand('solarDhwTemperature', 'Température eau chaude panneaux solaires', 'numeric');
+                break;
+            case self::HEATING_SERVICE_TIMEBASED:
+                $this->createServiceTimeBasedCommands($feature);
+                break;
+            case $this->buildFeatureBurner($deviceId, self::STATISTICS):
+                $this->createBurnerStatisticsCommands($feature);
+                break;
+            case $this->buildFeatureCompressor($deviceId, self::STATISTICS):
+                $this->createCompressorStatisticsCommands($feature);
+                break;
+            case $this->buildFeatureBurner($deviceId, self::MODULATION):
+                $this->createInfoCommand('heatingBurnerModulation', 'Modulation de puissance', 'numeric');
+                break;
+            case self::HOLIDAY_PROGRAM:
+                $this->createHolidayProgramCommands($feature);
+                break;
+            case self::HOLIDAY_AT_HOME_PROGRAM:
+                $this->createHolidayAtHomeProgramCommands($feature);
+                break;
+        }
+    }
+
+    private function createInfoCommand($logicalId, $name, $subType, $unit = '')
+    {
+        $obj = $this->getCmd(null, $logicalId);
+        if (!is_object($obj)) {
+            $obj = new viessmannIotCmd();
+            $obj->setName(__($name, __FILE__));
+            $obj->setIsVisible(1);
+            $obj->setIsHistorized(0);
+            if ($unit) {
+                $obj->setUnite($unit);
+            }
+        }
+        $obj->setEqLogic_id($this->getId());
+        $obj->setType('info');
+        $obj->setSubType($subType);
+        $obj->setLogicalId($logicalId);
+        $obj->save();
+    }
+
+    private function createDhwTemperatureCommands($feature)
+    {
+        $this->createInfoCommand('dhwTemperature', 'Consigne eau chaude', 'numeric');
+        if (isset($feature["commands"]["setTargetTemperature"])) {
+            $this->createSliderCommand('dhwSlider', 'Slider consigne eau chaude', 'dhwTemperature', 10, 60);
+        }
+    }
+
+    private function createSliderCommand($logicalId, $name, $value, $min, $max)
+    {
+        $obj = $this->getCmd(null, $logicalId);
+        if (!is_object($obj)) {
+            $obj = new viessmannIotCmd();
+            $obj->setName(__($name, __FILE__));
+            $obj->setIsVisible(1);
+            $obj->setIsHistorized(0);
+            $obj->setUnite('°C');
+        }
+        $obj->setEqLogic_id($this->getId());
+        $obj->setType('action');
+        $obj->setSubType('slider');
+        $obj->setLogicalId($logicalId);
+        $obj->setValue($this->getCmd(null, $value)->getId());
+        $obj->setConfiguration('minValue', $min);
+        $obj->setConfiguration('maxValue', $max);
+        $obj->save();
+    }
+
+    private function createActiveModeCommands($feature)
+    {
+        $this->createInfoCommand('activeMode', 'Mode activé', 'string');
+        foreach ($feature["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"] as $mode) {
+            $this->createModeCommand($mode);
+        }
+    }
+
+    private function createModeCommand($mode)
+    {
+        $logicalId = 'mode' . ucfirst($mode);
+        $name = 'Mode ' . $mode;
+        $this->createActionCommand($logicalId, $name);
+    }
+
+    private function createActionCommand($logicalId, $name)
+    {
+        $obj = $this->getCmd(null, $logicalId);
+        if (!is_object($obj)) {
+            $obj = new viessmannIotCmd();
+            $obj->setName(__($name, __FILE__));
+        }
+        $obj->setEqLogic_id($this->getId());
+        $obj->setLogicalId($logicalId);
+        $obj->setType('action');
+        $obj->setSubType('other');
+        $obj->save();
+    }
+
+    private function createActiveDhwModeCommands($feature)
+    {
+        $this->createInfoCommand('activeDhwMode', 'Mode eau chaude activé', 'string');
+        foreach ($feature["commands"]["setMode"]["params"]["mode"]["constraints"]["enum"] as $mode) {
+            $this->createDhwModeCommand($mode);
+        }
+    }
+
+    private function createDhwModeCommand($mode)
+    {
+        $logicalId = 'modeDhw' . ucfirst($mode);
+        $name = 'Mode dhw ' . $mode;
+        $this->createActionCommand($logicalId, $name);
+    }
+
+    private function createComfortProgramCommands($feature)
+    {
+        $this->setConfiguration('comfortProgram', $feature["feature"])->save();
+        $this->createInfoCommand('comfortProgramTemperature', 'Consigne de confort', 'numeric', '°C');
+        $this->createSliderCommand('comfortProgramSlider', 'Slider consigne de confort', 'comfortProgramTemperature', 3, 37);
+        $this->createInfoCommand('isActivateComfortProgram', 'Programme comfort actif', 'binary');
+        $this->createActionCommand('activateComfortProgram', 'Activer programme confort');
+        $this->createActionCommand('deActivateComfortProgram', 'Désactiver programme confort');
+    }
+
+    private function createNormalProgramCommands($feature)
+    {
+        $this->setConfiguration('normalProgram', $feature["feature"])->save();
+        $this->createInfoCommand('normalProgramTemperature', 'Consigne normale', 'numeric', '°C');
+        $this->createSliderCommand('normalProgramSlider', 'Slider consigne normale', 'normalProgramTemperature', 3, 37);
+    }
+
+    private function createReducedProgramCommands($feature)
+    {
+        $this->setConfiguration('reducedProgram', $feature["feature"])->save();
+        $this->createInfoCommand('reducedProgramTemperature', 'Consigne réduite', 'numeric', '°C');
+        $this->createSliderCommand('reducedProgramSlider', 'Slider consigne réduite', 'reducedProgramTemperature', 3, 37);
+    }
+
+    private function createEcoProgramCommands($feature)
+    {
+        $this->createInfoCommand('isActivateEcoProgram', 'Programme éco actif', 'binary');
+        $this->createActionCommand('activateEcoProgram', 'Activer programme éco');
+        $this->createActionCommand('deActivateEcoProgram', 'Désactiver programme éco');
+    }
+
+    private function createLastScheduleCommands($feature)
+    {
+        $this->createInfoCommand('isActivateLastSchedule', 'Prolonger programme actif', 'binary');
+        $this->createActionCommand('activateLastSchedule', 'Activer prolonger programme');
+        $this->createActionCommand('deActivateLastSchedule', 'Désactiver prolonger programme');
+    }
+
+    private function createOneTimeDhwChargeCommands($feature)
+    {
+        $this->createInfoCommand('isOneTimeDhwCharge', 'Forcer Eau chaude', 'binary');
+        $this->createActionCommand('startOneTimeDhwCharge', 'Activer demande eau chaude');
+        $this->createActionCommand('stopOneTimeDhwCharge', 'Désactiver demande eau chaude');
+    }
+
+    private function createHeatingCurveCommands($feature)
+    {
+        $this->createInfoCommand('slope', 'Pente', 'numeric');
+        $this->createInfoCommand('shift', 'Parallèle', 'numeric');
+        $this->createSliderCommand('slopeSlider', 'Slider pente', 'slope', 0.2, 3.5);
+        $this->createSliderCommand('shiftSlider', 'Slider parallèle', 'shift', -13, 40);
+    }
+
+    private function createDhwScheduleCommands($feature)
+    {
+        $this->createInfoCommand('dhwSchedule', 'Programmation eau chaude', 'string');
+        $this->createActionCommand('setDhwSchedule', 'Set Prog Eau Chaude');
+    }
+
+    private function createHeatingScheduleCommands($feature)
+    {
+        $this->createInfoCommand('heatingSchedule', 'Programmation chauffage', 'string');
+        $this->createActionCommand('setHeatingSchedule', 'Set Prog Chauffage');
+    }
+
+    private function createServiceTimeBasedCommands($feature)
+    {
+        $this->createInfoCommand('lastServiceDate', 'Date dernier entretien', 'string');
+        $this->createInfoCommand('serviceInterval', 'Intervalle entretien', 'numeric');
+        $this->createInfoCommand('monthSinceService', 'Mois entretien', 'numeric');
+    }
+
+    private function createBurnerStatisticsCommands($feature)
+    {
+        $this->createInfoCommand('heatingBurnerHoursPerDay', 'Heures fonctionnement brûleur par jour', 'numeric');
+        $this->createInfoCommand('heatingBurnerHours', 'Heures fonctionnement brûleur', 'numeric');
+        $this->createInfoCommand('heatingBurnerStartsPerDay', 'Démarrages du brûleur par jour', 'numeric');
+        $this->createInfoCommand('heatingBurnerStarts', 'Démarrages du brûleur', 'numeric');
+    }
+
+    private function createCompressorStatisticsCommands($feature)
+    {
+        $this->createInfoCommand('heatingCompressorHoursPerDay', 'Heures fonctionnement compresseur par jour', 'numeric');
+        $this->createInfoCommand('heatingCompressorHours', 'Heures fonctionnement compresseur', 'numeric');
+        $this->createInfoCommand('heatingCompressorStartsPerDay', 'Démarrages du compresseur par jour', 'numeric');
+        $this->createInfoCommand('heatingCompressorStarts', 'Démarrages du compresseur', 'numeric');
+    }
+
+    private function createHolidayProgramCommands($feature)
+    {
+        $this->createInfoCommand('startHoliday', 'Date début', 'string');
+        $this->createInfoCommand('endHoliday', 'Date fin', 'string');
+        $this->createActionCommand('startHolidayText', 'Date Début texte');
+        $this->createActionCommand('endHolidayText', 'Date Fin texte');
+        $this->createActionCommand('scheduleHolidayProgram', 'Activer programme vacances');
+        $this->createActionCommand('unscheduleHolidayProgram', 'Désactiver programme vacances');
+        $this->createInfoCommand('isScheduleHolidayProgram', 'Programme vacances actif', 'binary');
+    }
+
+    private function createHolidayAtHomeProgramCommands($feature)
+    {
+        $this->createInfoCommand('startHolidayAtHome', 'Date début maison', 'string');
+        $this->createInfoCommand('endHolidayAtHome', 'Date fin maison', 'string');
+        $this->createActionCommand('startHolidayAtHomeText', 'Date Début maison texte');
+        $this->createActionCommand('endHolidayAtHomeText', 'Date Fin maison texte');
+        $this->createActionCommand('scheduleHolidayAtHomeProgram', 'Activer programme vacances maison');
+        $this->createActionCommand('unscheduleHolidayAtHomeProgram', 'Désactiver programme vacances maison');
+        $this->createInfoCommand('isScheduleHolidayAtHomeProgram', 'Programme vacances maison actif', 'binary');
     }
 
     // Accès au serveur Viessmann
@@ -3405,12 +2263,12 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             $first = true;
             foreach (self::byType('viessmannIot') as $viessmann) {
                 if ($viessmann->getIsEnable() == 1) {
-                    if ($first == true) {
+                    if ($first) {
                         $viessmannApi = $viessmann->getViessmann();
                         $first = false;
                     }
 
-                    if ($viessmannApi != null) {
+                    if (isset($viessmannApi)) {
                         $viessmann->rafraichir($viessmannApi);
                     }
                 }
@@ -3905,18 +2763,14 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             }
             $commande .= '"' . $jours[$i] . '": [';
             for ($j = 0; $j < $n; $j += 3) {
-                $mode = $subElements[$j];
+                $mode = $subElements[$j] == 'n' ? 'normal' : 'comfort';
                 $start = $subElements[$j + 1];
                 $end = $subElements[$j + 2];
                 $commande .= '{';
-                if ($mode == 'n') {
-                    $commande .= '"mode": "normal",';
-                } else {
-                    $commande .= '"mode": "comfort",';
-                }
+                $commande .= '"mode": "' . $mode . '",';
                 $commande .= '"start": "' . $start . '",';
                 $commande .= '"end": "' . $end . '",';
-                $commande .= '"position": ' . $j / 3.;
+                $commande .= '"position": ' . $j / 3;
                 $commande .= '}';
                 if ($j < $n - 3) {
                     $commande .= ',';
@@ -4019,25 +2873,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         self::periodique();
     }
 
-    public static function cron10()
-    {
-        self::periodique();
-    }
 
-    public static function cron15()
-    {
-        self::periodique();
-    }
-
-    public static function cron30()
-    {
-        self::periodique();
-    }
-
-    public static function cronHourly()
-    {
-        self::periodique();
-    }
 
     // Fonction exécutée automatiquement avant la création de l'équipement
     //
@@ -4073,332 +2909,55 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     //
     public function postSave()
     {
-        $obj = $this->getCmd(null, 'refresh');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Rafraichir', __FILE__));
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setLogicalId('refresh');
-        $obj->setType('action');
-        $obj->setSubType('other');
-        $obj->save();
+        $commands = [
+            'refresh' => ['name' => __('Rafraichir', __FILE__), 'type' => 'action', 'subType' => 'other'],
+            'refreshDate' => ['name' => __('Date rafraichissement', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
+            'outsideTemperature' => ['name' => __('Température extérieure', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'unite' => '°C', 'isVisible' => 1, 'isHistorized' => 0],
+            'outsideMinTemperature' => ['name' => __('Température extérieure minimum', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'unite' => '°C', 'isVisible' => 1, 'isHistorized' => 1],
+            'outsideMaxTemperature' => ['name' => __('Température extérieure maximum', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'unite' => '°C', 'isVisible' => 1, 'isHistorized' => 1],
+            'roomTemperature' => ['name' => __('Température intérieure', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 0],
+            'programTemperature' => ['name' => __('Consigne radiateurs', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'unite' => '°C', 'isVisible' => 1, 'isHistorized' => 0],
+            'totalGazConsumption' => ['name' => __('Consommation gaz', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 0],
+            'dhwGazConsumption' => ['name' => __('Consommation gaz eau chaude', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 0],
+            'heatingGazConsumption' => ['name' => __('Consommation gaz chauffage', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 0],
+            'heatingPowerConsumption' => ['name' => __('Consommation électrique chauffage', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 0],
+            'dhwPowerConsumption' => ['name' => __('Consommation électrique eau chaude', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 0],
+            'totalPowerConsumption' => ['name' => __('Consommation électrique totale', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 0],
+            'curve' => ['name' => __('Courbe de chauffe', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
+            'totalGazHistorize' => ['name' => __('Historisation gaz', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'heatingGazHistorize' => ['name' => __('Historisation gaz chauffage', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'dhwGazHistorize' => ['name' => __('Historisation gaz eau chaude', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'heatingPowerHistorize' => ['name' => __('Historisation électricité chauffage', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'dhwPowerHistorize' => ['name' => __('Historisation électricité eau chaude', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'totalPowerHistorize' => ['name' => __('Historisation électricité totale', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'histoTemperatureInt' => ['name' => __('Historique température intérieure', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'histoTemperatureCsg' => ['name' => __('Historique température consigne', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'histoTemperatureExt' => ['name' => __('Historique température extérieure', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
+            'errors' => ['name' => __('Erreurs', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
+            'currentError' => ['name' => __('Erreur courante', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
+        ];
 
-        $obj = $this->getCmd(null, 'refreshDate');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Date rafraichissement', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
+        foreach ($commands as $logicalId => $command) {
+            $obj = $this->getCmd(null, $logicalId);
+            if (!is_object($obj)) {
+                $obj = new viessmannIotCmd();
+                $obj->setName($command['name']);
+                if (isset($command['unite'])) {
+                    $obj->setUnite($command['unite']);
+                }
+                if (isset($command['isVisible'])) {
+                    $obj->setIsVisible($command['isVisible']);
+                }
+                if (isset($command['isHistorized'])) {
+                    $obj->setIsHistorized($command['isHistorized']);
+                }
+            }
+            $obj->setEqLogic_id($this->getId());
+            $obj->setType($command['type']);
+            $obj->setSubType($command['subType']);
+            $obj->setLogicalId($logicalId);
+            $obj->save();
         }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('string');
-        $obj->setLogicalId('refreshDate');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'outsideTemperature');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Température extérieure', __FILE__));
-            $obj->setUnite('°C');
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('outsideTemperature');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'outsideMinTemperature');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Température extérieure minimum', __FILE__));
-            $obj->setUnite('°C');
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('outsideMinTemperature');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'outsideMaxTemperature');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Température extérieure maximum', __FILE__));
-            $obj->setUnite('°C');
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('outsideMaxTemperature');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'roomTemperature');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Température intérieure', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('roomTemperature');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'programTemperature');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Consigne radiateurs', __FILE__));
-            $obj->setUnite('°C');
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('programTemperature');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'totalGazConsumption');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Consommation gaz', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('totalGazConsumption');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'dhwGazConsumption');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Consommation gaz eau chaude', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('dhwGazConsumption');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'heatingGazConsumption');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Consommation gaz chauffage', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('heatingGazConsumption');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'heatingPowerConsumption');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Consommation électrique chauffage', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('heatingPowerConsumption');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'dhwPowerConsumption');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Consommation électrique eau chaude', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('dhwPowerConsumption');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'totalPowerConsumption');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Consommation électrique totale', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('totalPowerConsumption');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'curve');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Courbe de chauffe', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('string');
-        $obj->setLogicalId('curve');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'totalGazHistorize');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historisation gaz', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('totalGazHistorize');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'heatingGazHistorize');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historisation gaz chauffage', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('heatingGazHistorize');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'dhwGazHistorize');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historisation gaz eau chaude', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('dhwGazHistorize');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'heatingPowerHistorize');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historisation électricité chauffage', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('heatingPowerHistorize');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'dhwPowerHistorize');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historisation électricité eau chaude ', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('dhwPowerHistorize');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'totalPowerHistorize');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historisation électricité totale', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('totalPowerHistorize');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'histoTemperatureInt');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historique température intérieure', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('histoTemperatureInt');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'histoTemperatureCsg');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historique température consigne', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('histoTemperatureCsg');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'histoTemperatureExt');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Historique température extérieure', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(1);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('numeric');
-        $obj->setLogicalId('histoTemperatureExt');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'errors');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Erreurs', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('string');
-        $obj->setLogicalId('errors');
-        $obj->save();
-
-        $obj = $this->getCmd(null, 'currentError');
-        if (!is_object($obj)) {
-            $obj = new viessmannIotCmd();
-            $obj->setName(__('Erreur courante', __FILE__));
-            $obj->setIsVisible(1);
-            $obj->setIsHistorized(0);
-        }
-        $obj->setEqLogic_id($this->getId());
-        $obj->setType('info');
-        $obj->setSubType('string');
-        $obj->setLogicalId('currentError');
-        $obj->save();
     }
 
     // Fonction exécutée automatiquement avant la suppression de l'équipement
