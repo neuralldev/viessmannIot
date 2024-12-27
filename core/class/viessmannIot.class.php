@@ -2230,51 +2230,38 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     public static function periodique()
     {
         log::add('viessmannIot', 'debug', 'Rafraichissement périodique');
-        $oldUserName = '';
-        $oldPassword = '';
 
-        $first = true;
-        $tousPareils = true;
+        $credentials = [];
         foreach (self::byType('viessmannIot') as $viessmann) {
             if ($viessmann->getIsEnable() == 1) {
                 $userName = trim($viessmann->getConfiguration('userName', ''));
                 $password = trim($viessmann->getConfiguration('password', ''));
-                if ($userName == '' || $password == '') {
-                    return;
-                }
-                if ($first == false) {
-                    if (($userName != $oldUserName) || ($password != $oldPassword)) {
-                        $tousPareils = false;
-                    }
-                }
-                $oldUserName = $userName;
-                $oldPassword = $password;
-                $first = false;
             }
+            $credentials[] = ['userName' => $userName, 'password' => $password];
+            }
+        if (empty($credentials)) {
+            return;
         }
 
-        if ($tousPareils == true) {
-            $viessmann = null;
-            $first = true;
+        $uniqueCredentials = array_unique($credentials, SORT_REGULAR);
+        if (count($uniqueCredentials) === 1) {
+            $viessmannApi = null;
             foreach (self::byType('viessmannIot') as $viessmann) {
                 if ($viessmann->getIsEnable() == 1) {
-                    if ($first) {
+                    if ($viessmannApi === null) {
                         $viessmannApi = $viessmann->getViessmann();
-                        $first = false;
                     }
-
-                    if (isset($viessmannApi)) {
+                    if ($viessmannApi !== null) {
                         $viessmann->rafraichir($viessmannApi);
                     }
                 }
             }
             unset($viessmannApi);
         } else {
-            $viessmann = null;
             foreach (self::byType('viessmannIot') as $viessmann) {
                 if ($viessmann->getIsEnable() == 1) {
                     $viessmannApi = $viessmann->getViessmann();
-                    if ($viessmannApi != null) {
+                    if ($viessmannApi !== null) {
                         $viessmann->rafraichir($viessmannApi);
                         unset($viessmannApi);
                     }
@@ -2745,38 +2732,29 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         }
 
         $jours = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-        $commande = '{"newSchedule": {';
+        $schedule = [];
+
         for ($i = 0; $i < 7; $i++) {
-            if ($titre == $jours[$i]) {
-                $subElements = explode(',', $message);
-            } else {
-                $subElements = explode(',', $elements[$i]);
-            }
+            $subElements = ($titre == $jours[$i]) ? explode(',', $message) : explode(',', $elements[$i]);
             $n = count($subElements);
-            if (($n % 3) != 0) {
-                return ('Nombre de sous éléments <> 3');
+            if ($n % 3 != 0) {
+            return 'Nombre de sous éléments <> 3';
             }
-            $commande .= '"' . $jours[$i] . '": [';
+
+            $daySchedule = [];
             for ($j = 0; $j < $n; $j += 3) {
-                $mode = $subElements[$j] == 'n' ? 'normal' : 'comfort';
-                $start = $subElements[$j + 1];
-                $end = $subElements[$j + 2];
-                $commande .= '{';
-                $commande .= '"mode": "' . $mode . '",';
-                $commande .= '"start": "' . $start . '",';
-                $commande .= '"end": "' . $end . '",';
-                $commande .= '"position": ' . $j / 3;
-                $commande .= '}';
-                if ($j < $n - 3) {
-                    $commande .= ',';
-                }
+            $mode = $subElements[$j] == 'n' ? 'normal' : 'comfort';
+            $daySchedule[] = [
+                'mode' => $mode,
+                'start' => $subElements[$j + 1],
+                'end' => $subElements[$j + 2],
+                'position' => $j / 3
+            ];
             }
-            $commande .= ']';
-            if ($i < 6) {
-                $commande .= ',';
-            }
+            $schedule[$jours[$i]] = $daySchedule;
         }
-        $commande .= '}}';
+
+        $commande = json_encode(['newSchedule' => $schedule]);
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $this->setCache('tempsRestant', self::REFRESH_TIME);
@@ -2807,38 +2785,28 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         }
 
         $jours = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-        $commande = '{"newSchedule": {';
+        $schedule = [];
+
         for ($i = 0; $i < 7; $i++) {
-            if ($titre == $jours[$i]) {
-                $subElements = explode(',', $message);
-            } else {
-                $subElements = explode(',', $elements[$i]);
-            }
+            $subElements = ($titre == $jours[$i]) ? explode(',', $message) : explode(',', $elements[$i]);
             $n = count($subElements);
-            if (($n % 3) != 0) {
-                return ('Nombre de sous éléments <> 3');
+            if ($n % 3 != 0) {
+            return 'Nombre de sous éléments <> 3';
             }
-            $commande .= '"' . $jours[$i] . '": [';
+
+            $daySchedule = [];
             for ($j = 0; $j < $n; $j += 3) {
-                $mode = $subElements[$j];
-                $start = $subElements[$j + 1];
-                $end = $subElements[$j + 2];
-                $commande .= '{';
-                $commande .= '"mode": "on",';
-                $commande .= '"start": "' . $start . '",';
-                $commande .= '"end": "' . $end . '",';
-                $commande .= '"position": ' . $j / 3.;
-                $commande .= '}';
-                if ($j < $n - 3) {
-                    $commande .= ',';
-                }
+            $daySchedule[] = [
+                'mode' => 'on',
+                'start' => $subElements[$j + 1],
+                'end' => $subElements[$j + 2],
+                'position' => $j / 3
+            ];
             }
-            $commande .= ']';
-            if ($i < 6) {
-                $commande .= ',';
-            }
+            $schedule[$jours[$i]] = $daySchedule;
         }
-        $commande .= '}}';
+
+        $commande = json_encode(['newSchedule' => $schedule]);
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $this->setCache('tempsRestant', self::REFRESH_TIME);
@@ -3980,9 +3948,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 $datetime = $row->getDatetime();
                 $ts = strtotime($datetime);
                 $value = round($row->getValue(), 1);
-                $date = date("Y", $ts) . "," . (date("m", $ts) - 1) . ","
-                    . date("d", $ts) . "," . date("H", $ts) . "," . date("i", $ts) . "," . date("s", $ts);
-                $array[] = array('ts' => $date, 'value' => $value);
+                $date = date("Y,m,d,H,i,s", $ts);
+                $dateParts = explode(",", $date);
+                $dateParts[1] -= 1; // Adjust month to zero-based index
+                $array[] = array('ts' => implode(",", $dateParts), 'value' => $value);
             }
         }
         return ($array);
@@ -4013,9 +3982,9 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 $datetime = $row->getDatetime();
                 $ts = strtotime($datetime);
                 $value = round($row->getValue(), 1);
-                $date = date("Y", $ts) . "," . (date("m", $ts) - 1) . ","
-                    . date("d", $ts) . "," . date("H", $ts) . "," . date("i", $ts) . "," . date("s", $ts);
-                $array[] = array('ts' => $date, 'value' => $value);
+                $dateParts = explode(",", date("Y,m,d,H,i,s", $ts));
+                $dateParts[1] -= 1; // Adjust month to zero-based index
+                $array[] = array('ts' => implode(",", $dateParts), 'value' => $value);
             }
         }
         return ($array);
@@ -4046,9 +4015,9 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 $datetime = $row->getDatetime();
                 $ts = strtotime($datetime);
                 $value = round($row->getValue(), 1);
-                $date = date("Y", $ts) . "," . (date("m", $ts) - 1) . ","
-                    . date("d", $ts) . "," . date("H", $ts) . "," . date("i", $ts) . "," . date("s", $ts);
-                $array[] = array('ts' => $date, 'value' => $value);
+                $dateParts = explode(",", date("Y,m,d,H,i,s", $ts));
+                $dateParts[1] -= 1; // Adjust month to zero-based index
+                $array[] = array('ts' => implode(",", $dateParts), 'value' => $value);
             }
         }
         return ($array);
