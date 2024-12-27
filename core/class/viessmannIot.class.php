@@ -2924,7 +2924,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 log::add(  'viessmannIot', 'debug', "postSave called, command $logicalId already exists");
             }
         }
-        $this->save();
+        
     }
 
 
