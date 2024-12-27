@@ -2876,6 +2876,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     //
     public function postSave()
     {
+        log::add('viessmannIot', 'debug', "postSave called");
         $commands = [
             'refresh' => ['name' => __('Rafraichir', __FILE__), 'type' => 'action', 'subType' => 'other'],
             'refreshDate' => ['name' => __('Date rafraichissement', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
@@ -2907,6 +2908,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         foreach ($commands as $logicalId => $command) {
             $obj = $this->getCmd($command['type'], $logicalId);
             if (!is_object($obj)) {
+                log::add(  'viessmannIot', 'debug', "postSave called, create command $logicalId");
                 $obj = new viessmannIotCmd();
                 $obj->setName($command['name']);
                 if (isset($command['unite'])) {
