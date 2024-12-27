@@ -2947,8 +2947,9 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $version = jeedom::versionAlias($_version);
 
         $obj = $this->getCmd(null, 'refresh');
-        $replace["#idRefresh#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#idRefresh#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'isHeatingBurnerActive');
         if (is_object($obj)) {
             $replace["#isHeatingBurnerActive#"] = $obj->execCmd();
