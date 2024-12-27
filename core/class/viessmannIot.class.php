@@ -3851,9 +3851,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $replace["#range_temperature#"] = $temp;
 
         $obj = $this->getCmd(null, 'curve');
-        $replace["#curve#"] = $obj->execCmd();
-        $replace["#idCurve#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#curve#"] = $obj->execCmd();
+            $replace["#idCurve#"] = $obj->getId();
+        }
         $temp = implode(',', array_map(function ($ot) {
             return "'$ot'";
         }, range(25, -20, -5)));
