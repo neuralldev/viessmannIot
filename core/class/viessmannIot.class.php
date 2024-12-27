@@ -2996,17 +2996,20 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $replace["#uniteGaz#"] = $uniteGaz;
 
         $obj = $this->getCmd(null, 'roomTemperature');
-        $replace["#roomTemperature#"] = $obj->execCmd();
-        $replace["#idRoomTemperature#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#roomTemperature#"] = $obj->execCmd();
+            $replace["#idRoomTemperature#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'secondaryCircuitTemperature');
-        $replace["#secondaryCircuitTemperature#"] = $obj->execCmd();
-        $replace["#idsecondaryCircuit#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#secondaryCircuitTemperature#"] = $obj->execCmd();
+            $replace["#idsecondaryCircuit#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'programTemperature');
-        $replace["#programTemperature#"] = $obj->execCmd();
-        $replace["#idProgramTemperature#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#programTemperature#"] = $obj->execCmd();
+            $replace["#idProgramTemperature#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'hotWaterStorageTemperature');
         if (is_object($obj)) {
             $replace["#hotWaterStorageTemperature#"] = $obj->execCmd();
