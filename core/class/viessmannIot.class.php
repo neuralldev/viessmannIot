@@ -149,6 +149,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 //          .demand -> "unknown" ????
 //          .temperature -> température du mode
 
+/*
     public static function deamon_info()
     {
         $return = array();
@@ -213,6 +214,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         }
         sleep(1);
     }
+*/
 
     public function validateDate($date, $format = 'Y-m-d H:i:s')
     {
