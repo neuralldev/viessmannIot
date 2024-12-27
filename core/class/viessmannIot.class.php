@@ -3910,13 +3910,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $replace["#joursMinMax#"] = $joursMinMax;
 
         $obj = $this->getCmd(null, 'histoTemperatureCsg');
-        $replace["#idHistoTemperatureCsg#"] = $obj->getId();
+        if (is_object($obj)) 
+            $replace["#idHistoTemperatureCsg#"] = $obj->getId();
 
         $obj = $this->getCmd(null, 'histoTemperatureInt');
-        $replace["#idHistoTemperatureInt#"] = $obj->getId();
+        if (is_object($obj)) 
+            $replace["#idHistoTemperatureInt#"] = $obj->getId();
 
         $obj = $this->getCmd(null, 'histoTemperatureExt');
-        $replace["#idHistoTemperatureExt#"] = $obj->getId();
+        if (is_object($obj)) 
+            $replace["#idHistoTemperatureExt#"] = $obj->getId();
 
         $top = $this->getCache('top', '200px');
         $replace["#top#"] = $top;
