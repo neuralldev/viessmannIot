@@ -613,6 +613,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $refreshToken = $this->getCache('refresh_token', '');
 
         if (($userName === '') || ($password === '') || ($clientId === '') || ($codeChallenge === '')) {
+            log::add('viessmannIot', 'debug', 'Configuration incomplète');
             return null;
         }
 
