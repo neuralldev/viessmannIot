@@ -3036,25 +3036,30 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         }
 
         $obj = $this->getCmd(null, 'dhwGazConsumption');
-        $replace["#dhwGazConsumption#"] = $obj->execCmd();
-        $replace["#idDhwGazConsumption#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#dhwGazConsumption#"] = $obj->execCmd();
+            $replace["#idDhwGazConsumption#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'heatingGazConsumption');
-        $replace["#heatingGazConsumption#"] = $obj->execCmd();
-        $replace["#idHeatingGazConsumption#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#heatingGazConsumption#"] = $obj->execCmd();
+            $replace["#idHeatingGazConsumption#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'dhwPowerConsumption');
-        $replace["#dhwPowerConsumption#"] = $obj->execCmd();
-        $replace["#idDhwPowerConsumption#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#dhwPowerConsumption#"] = $obj->execCmd();
+            $replace["#idDhwPowerConsumption#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'heatingPowerConsumption');
-        $replace["#heatingPowerConsumption#"] = $obj->execCmd();
-        $replace["#idHeatingPowerConsumption#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#heatingPowerConsumption#"] = $obj->execCmd();
+            $replace["#idHeatingPowerConsumption#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'refreshDate');
-        $replace["#refreshDate#"] = $obj->execCmd();
-        $replace["#idRefreshDate#"] = $obj->getId();
-
+        if (is_object($obj)) {
+            $replace["#refreshDate#"] = $obj->execCmd();
+            $replace["#idRefreshDate#"] = $obj->getId();
+        }
         $obj = $this->getCmd(null, 'heatingBurnerHours');
         if (is_object($obj)) {
             $replace["#heatingBurnerHours#"] = $obj->execCmd();
