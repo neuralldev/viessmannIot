@@ -193,12 +193,14 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
     public static function salsa()
     {
+        log::add('viessmannIot', 'debug', "salsa called");
         foreach (viessmannIot::byType('viessmannIot', true) as $viessmannIot) {
             if ($viessmannIot->getIsEnable() == 1) {
                 $tempsRestant = $viessmannIot->getCache('tempsRestant', 10);
                 if ($tempsRestant > 0) {
                     $tempsRestant--;
                     if ($tempsRestant == 0) {
+                        log::add('viessmannIot', 'debug', "salsa viessmann api called");
                         $viessmannApi = $viessmannIot->getViessmann();
                         if ($viessmannApi !== null) {
                             $viessmannIot->rafraichir($viessmannApi);
@@ -2861,6 +2863,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
     public static function cron()
     {
+        log::add('viessmannIot', 'debug', "cron direct called");
         $maintenant = time();
         $minute = date("i", $maintenant);
         if (($minute % 2) == 0) {
