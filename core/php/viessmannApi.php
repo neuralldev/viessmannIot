@@ -72,7 +72,7 @@ class ViessmannApi
         $requiredParams = ['clientId', 'codeChallenge', 'user', 'pwd'];
         foreach ($requiredParams as $param) {
             if (!array_key_exists($param, $params) || empty($params[$param])) {
-            throw new ViessmannApiException(ucfirst($param) . ' obligatoire', 2);
+                throw new ViessmannApiException(ucfirst($param) . ' obligatoire', 2);
             }
             $this->$param = $params[$param];
         }
@@ -101,11 +101,11 @@ class ViessmannApi
 
         if (!$this->refreshToken()) {
             if (!($code = $this->getCode())) {
-            throw new ViessmannApiException("Erreur acquisition code sur le serveur Viessmann", 2);
+                throw new ViessmannApiException("Erreur acquisition code sur le serveur Viessmann", 2);
             }
         
             if (!$this->getToken($code)) {
-            throw new ViessmannApiException("Erreur acquisition token sur le serveur Viessmann", 2);
+                throw new ViessmannApiException("Erreur acquisition token sur le serveur Viessmann", 2);
             }
         }   
 
@@ -119,36 +119,39 @@ class ViessmannApi
         }
     }
 
-    // Lire le code d'accès au serveur Viessmann
-    //
-    private function getCode()
+    // Fonction pour effectuer les appels cURL
+    private function makeCurlRequest($url, $header, $post = false, $postFields = null)
     {
-        // Paramètres code
-        //
-        $url = self::AUTHORIZE_URL . "?client_id=" . $this->clientId . "&code_challenge=" . $this->codeChallenge . "&scope=IoT%20User%20offline_access&redirect_uri=" .
-        self::CALLBACK_URI . "&response_type=code";
-        
-        $header = array("Content-Type: application/x-www-form-urlencoded");
+        $curloptions = [
+            CURLOPT_URL => $url,
+            CURLOPT_HTTPHEADER => $header,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+        ];
 
-        $curloptions = array(
-           CURLOPT_URL => $url,
-           CURLOPT_HTTPHEADER => $header,
-           CURLOPT_SSL_VERIFYPEER => false,
-           CURLOPT_RETURNTRANSFER => true,
-           CURLOPT_USERPWD => $this->user.':'.$this->pwd,
-           CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-           CURLOPT_POST => true,
-        );
+        if ($post) {
+            $curloptions[CURLOPT_POST] = true;
+            if ($postFields) {
+                $curloptions[CURLOPT_POSTFIELDS] = $postFields;
+            }
+        }
 
-        // Appel Curl Code
-        //
         $curl = curl_init();
         curl_setopt_array($curl, $curloptions);
         $response = curl_exec($curl);
         curl_close($curl);
 
-        // Extraction Code
-        //
+        return $response;
+    }
+
+    // Lire le code d'accès au serveur Viessmann
+    private function getCode()
+    {
+        $url = self::AUTHORIZE_URL . "?client_id=" . $this->clientId . "&code_challenge=" . $this->codeChallenge . "&scope=IoT%20User%20offline_access&redirect_uri=" . self::CALLBACK_URI . "&response_type=code";
+        $header = ["Content-Type: application/x-www-form-urlencoded"];
+        $response = $this->makeCurlRequest($url, $header, true);
+
         if (preg_match('/code=([^&"]+)/', $response, $matches)) {
             return $matches[1];
         } else {
@@ -157,31 +160,12 @@ class ViessmannApi
     }
 
     // Lire le token d'accès au serveur Viessmann
-    //
     private function getToken($code)
     {
-        // Paramètres Token
-        $url = self::TOKEN_URL . "?grant_type=authorization_code&code_verifier=" . $this->codeChallenge . "&client_id=" .
-        $this->clientId . "&redirect_uri=" . self::CALLBACK_URI . "&code=" . $code;
-        
+        $url = self::TOKEN_URL . "?grant_type=authorization_code&code_verifier=" . $this->codeChallenge . "&client_id=" . $this->clientId . "&redirect_uri=" . self::CALLBACK_URI . "&code=" . $code;
         $header = ["Content-Type: application/x-www-form-urlencoded"];
+        $response = $this->makeCurlRequest($url, $header, true);
 
-        $curloptions = [
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-            CURLOPT_POST => true,
-        ];
-
-        // Appel Curl Token
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
-
-        // Extraction Token
         $json = json_decode($response, true);
         if (isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
             return false;
@@ -199,33 +183,16 @@ class ViessmannApi
     }
 
     // Rafraichir le token d'accès au serveur Viessmann 
-    //
     private function refreshToken()
     {
         if (empty($this->refreshToken)) {
             return false;
         }
 
-        // Paramètres Token
         $url = self::TOKEN_URL . "?grant_type=refresh_token&refresh_token=" . $this->refreshToken . "&client_id=" . $this->clientId;
         $header = ["Content-Type: application/x-www-form-urlencoded"];
+        $response = $this->makeCurlRequest($url, $header, true);
 
-        $curloptions = [
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-            CURLOPT_POST => true,
-        ];
-
-        // Appel Curl Token
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
-
-        // Extraction Token
         $json = json_decode($response, true);
         if (isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
             log::add('viessmannIot', 'debug', 'Refresh token error');
@@ -244,28 +211,11 @@ class ViessmannApi
     }
 
     // Lire les données d'identité
-    //
     public function getIdentity()
     {
-        // Lire les données utilisateur
-        //
         $url = self::IDENTITY_URL;
-        $header = array("Authorization: Bearer " . $this->accessToken);
-
-        $curloptions = array(
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-        );
-
-        // Appel Curl Données
-        //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $header = ["Authorization: Bearer " . $this->accessToken];
+        $response = $this->makeCurlRequest($url, $header);
 
         $this->identity = json_decode($response, true);
 
@@ -276,29 +226,11 @@ class ViessmannApi
     }
 
     // Lire les données du gateway
-    //
     public function getGateway()
     {
-
-        // Lire les données du gateway
-        //
         $url = self::GATEWAY_URL;
-        $header = array("Authorization: Bearer " . $this->accessToken);
-
-        $curloptions = array(
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-        );
-
-        // Appel Curl Données
-        //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $header = ["Authorization: Bearer " . $this->accessToken];
+        $response = $this->makeCurlRequest($url, $header);
 
         $this->gateway = json_decode($response, true);
         $json_file = __DIR__ . '/../../data/gateway.json';
@@ -313,34 +245,17 @@ class ViessmannApi
             file_put_contents($json_file, $response);
 
             return $this->gateway["message"];
-
         }
 
         return true;
-        
     }
 
     // Lire les features
-    //
     public function getFeatures()
     {
-        // Lire les données features
         $url = self::FEATURES_URL . "/installations/" . $this->installationId . "/gateways/" . $this->serial . "/devices/" . $this->deviceId . "/features";
         $header = ["Authorization: Bearer " . $this->accessToken];
-
-        $curloptions = [
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-        ];
-
-        // Appel Curl Données
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->makeCurlRequest($url, $header);
 
         $this->features = json_decode($response, true);
 
@@ -366,81 +281,13 @@ class ViessmannApi
         return true;
     }
 
-    // Lire log features
-    //
-    public function getLogFeatures()
-    {
-        return $this->logFeatures;
-    }
-
     // Lire les events
-    //
     public function getEvents()
     {
-        // Lire les données events
-        //
         $url = self::EVENTS_URL_1 . $this->installationId . self::EVENTS_URL_2 . "?gatewaySerial=" . $this->serial . "&limit=1000";
-        $header = array("Authorization: Bearer " . $this->accessToken);
+        $header = ["Authorization: Bearer " . $this->accessToken];
+        $response = $this->makeCurlRequest($url, $header);
 
-        $curloptions = array(
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-        );
-
-        // Appel Curl Données
-        //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
-/*
-        $response = '{
-            "data": [        
-                
-        {
-            "eventType": "device-error",
-            "gatewaySerial": "XXXXXXXXXXXXXXXX",
-            "body": {
-                "errorCode": "80",
-                "deviceId": "0",
-                "modelId": "VScotHO1_200_11",
-                "active": false,
-                "equipmentType": "Boiler",
-                "errorEventType": "Error",
-                "errorDescription": "No flame formation – gas pressure absent/low"
-            },
-            "createdAt": "2021-08-23T21:39:26.498Z",
-            "eventTimestamp": "2021-08-23T21:38:56.000Z",
-            "editedBy": "system",
-            "origin": "system"
-        },
-        
-        {
-            "eventType": "device-error",
-            "gatewaySerial": "XXXXXXXXXXXXXXXX",
-            "body": {
-                "errorCode": "80",
-                "deviceId": "0",
-                "modelId": "VScotHO1_200_11",
-                "active": true,
-                "equipmentType": "Boiler",
-                "errorEventType": "Error",
-                "errorDescription": "No flame formation – gas pressure absent/low"
-            },
-            "createdAt": "2021-08-23T21:38:47.061Z",
-            "eventTimestamp": "2021-08-23T21:28:45.000Z",
-            "editedBy": "system",
-            "origin": "system"
-        }
-    ],
-    "cursor": {
-        "next": ""
-    }
-}';
-*/
         $this->events = json_decode($response, true);
 
         if ($this->logFeatures == 'Oui') {
@@ -456,35 +303,15 @@ class ViessmannApi
     }
 
     // Ecrire une feature
-    //
     public function setFeature($feature, $action, $data)
     {
-
-        // Lire les données du gateway
-        //
         $url = self::FEATURES_URL . "/installations/" . $this->installationId . "/gateways/" . $this->serial . "/devices/" . $this->deviceId . "/features/" . $feature . "/commands/" . $action;
-
-        $header = array(
+        $header = [
             "Content-Type: application/json",
             "Accept : application/vnd.siren+json",
-            "Authorization: Bearer " . $this->accessToken);
- 
-        $curloptions = array(
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $data,
-        );
-
-        // Appel Curl Données
-        //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+            "Authorization: Bearer " . $this->accessToken
+        ];
+        $response = $this->makeCurlRequest($url, $header, true, $data);
 
         $features = json_decode($response, true);
 
@@ -494,70 +321,60 @@ class ViessmannApi
     }
 
     // Lire Installation Id
-    //
     public function getInstallationId($numChaudiere)
     {
         return $this->gateway["data"][$numChaudiere]["installationId"];
     }
 
     // Lire Login Id
-    //
     public function getSerial($numChaudiere)
     {
         return $this->gateway["data"][$numChaudiere]["serial"];
     }
 
     // Si nouveau token
-    //
     public function isNewToken()
     {
         return $this->if_new_token;
     }
 
     // Get Access Token
-    //
     public function getAccessToken()
     {
         return $this->accessToken;
     }
 
     // Get Refresh Token
-    //
     public function getRefreshToken()
     {
         return $this->refreshToken;
     }
 
     // Expires In
-    //
     public function getExpiresIn()
     {
         return $this->expires_in;
     }
 
     // Get Array Identity
-    //
     public function getArrayIdentity()
     {
         return $this->identity;
     }
 
     // Get Array Gateway
-    //
     public function getArrayGateway()
     {
         return $this->gateway;
     }
 
     // Get Array Features
-    //
     public function getArrayFeatures()
     {
         return $this->features;
     }
 
     // Get Array Events
-    //
     public function getArrayEvents()
     {
         return $this->events;

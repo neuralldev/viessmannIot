@@ -654,6 +654,11 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         return $viessmannApi;
     }
 
+    /**
+     * Summary of rafraichir
+     * @param ViessmannApi $viessmannApi
+     * @return void
+     */
     public function rafraichir($viessmannApi)
     {
         $this->setCache('tempsRestant', 0);
@@ -882,82 +887,20 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                         $obj->event($slope);
                     }
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_DHW_SCHEDULE) {
+                    $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
                     $dhwSchedule = '';
 
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['mon']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwSchedule .= 'n,';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['mon'][$j]['start'] . ',';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['mon'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $dhwSchedule .= ',';
+                    foreach ($days as $day) {
+                        $n = count($features["data"][$i]["properties"]['entries']['value'][$day]);
+                        for ($j = 0; $j < $n; $j++) {
+                            $dhwSchedule .= 'n,';
+                            $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value'][$day][$j]['start'] . ',';
+                            $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value'][$day][$j]['end'];
+                            if ($j < $n - 1) {
+                                $dhwSchedule .= ',';
+                            }
                         }
-                    }
-                    $dhwSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['tue']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwSchedule .= 'n,';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['tue'][$j]['start'] . ',';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['tue'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $dhwSchedule .= ',';
-                        }
-                    }
-                    $dhwSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['wed']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwSchedule .= 'n,';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['wed'][$j]['start'] . ',';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['wed'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $dhwSchedule .= ',';
-                        }
-                    }
-                    $dhwSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['thu']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwSchedule .= 'n,';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['thu'][$j]['start'] . ',';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['thu'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $dhwSchedule .= ',';
-                        }
-                    }
-                    $dhwSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['fri']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwSchedule .= 'n,';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['fri'][$j]['start'] . ',';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['fri'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $dhwSchedule .= ',';
-                        }
-                    }
-                    $dhwSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['sat']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwSchedule .= 'n,';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['sat'][$j]['start'] . ',';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['sat'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $dhwSchedule .= ',';
-                        }
-                    }
-                    $dhwSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['sun']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwSchedule .= 'n,';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['sun'][$j]['start'] . ',';
-                        $dhwSchedule .= $features["data"][$i]["properties"]['entries']['value']['sun'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $dhwSchedule .= ',';
-                        }
+                        $dhwSchedule .= ';';
                     }
 
                     $obj = $this->getCmd(null, 'dhwSchedule');
@@ -965,83 +908,22 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                         $obj->event($dhwSchedule);
                     }
                 } elseif ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::HEATING_SCHEDULE)) {
+                    $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
                     $heatingSchedule = '';
 
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['mon']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value']['mon'][$j]['mode'], 0, 1) . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['mon'][$j]['start'] . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['mon'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $heatingSchedule .= ',';
+                    foreach ($days as $day) {
+                        $n = count($features["data"][$i]["properties"]['entries']['value'][$day]);
+                        for ($j = 0; $j < $n; $j++) {
+                            $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value'][$day][$j]['mode'], 0, 1) . ',';
+                            $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value'][$day][$j]['start'] . ',';
+                            $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value'][$day][$j]['end'];
+                            if ($j < $n - 1) {
+                                $heatingSchedule .= ',';
+                            }
                         }
+                        $heatingSchedule .= ';';
                     }
-                    $heatingSchedule .= ';';
 
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['tue']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value']['tue'][$j]['mode'], 0, 1) . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['tue'][$j]['start'] . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['tue'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $heatingSchedule .= ',';
-                        }
-                    }
-                    $heatingSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['wed']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value']['wed'][$j]['mode'], 0, 1) . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['wed'][$j]['start'] . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['wed'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $heatingSchedule .= ',';
-                        }
-                    }
-                    $heatingSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['thu']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value']['thu'][$j]['mode'], 0, 1) . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['thu'][$j]['start'] . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['thu'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $heatingSchedule .= ',';
-                        }
-                    }
-                    $heatingSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['fri']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value']['fri'][$j]['mode'], 0, 1) . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['fri'][$j]['start'] . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['fri'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $heatingSchedule .= ',';
-                        }
-                    }
-                    $heatingSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['sat']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value']['sat'][$j]['mode'], 0, 1) . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['sat'][$j]['start'] . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['sat'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $heatingSchedule .= ',';
-                        }
-                    }
-                    $heatingSchedule .= ';';
-
-                    $n = count($features["data"][$i]["properties"]['entries']['value']['sun']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingSchedule .= substr($features["data"][$i]["properties"]['entries']['value']['sun'][$j]['mode'], 0, 1) . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['sun'][$j]['start'] . ',';
-                        $heatingSchedule .= $features["data"][$i]["properties"]['entries']['value']['sun'][$j]['end'];
-                        if ($j < $n - 1) {
-                            $heatingSchedule .= ',';
-                        }
-                    }
                     $obj = $this->getCmd(null, 'heatingSchedule');
                     if (is_object($obj)) {
                         $obj->event($heatingSchedule);
@@ -1085,539 +967,173 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_TOTAL) {
                     $bConsumptionSeen = true;
 
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['day']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['day']['value'][$j] * $facteurConversionGaz;
-                    }
-                    $this->getCmd(null, 'totalGazConsumption')->event($heatingGazConsumptions[0]);
+                    $periods = ['day', 'week', 'month', 'year'];
+                    $heatingGazConsumptions = [];
 
-                    $conso = $heatingGazConsumptions[0];
+                    foreach ($periods as $period) {
+                        $values = $features["data"][$i]["properties"][$period]['value'];
+                        $heatingGazConsumptions[$period] = array_map(function($value) use ($facteurConversionGaz) {
+                            return $value * $facteurConversionGaz;
+                        }, $values);
+                    }
+
+                    $this->getCmd(null, 'totalGazConsumption')->event($heatingGazConsumptions['day'][0]);
+
+                    $conso = $heatingGazConsumptions['day'][0];
                     $oldConso = $this->getCache('oldConsoTotal', -1);
                     if ($oldConso >= $conso) {
-                        $dateVeille = time() - 24 * 60 * 60;
-                        $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                        $this->getCmd(null, 'totalGazHistorize')->event($heatingGazConsumptions[1], $dateVeille);
+                        $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                        $this->getCmd(null, 'totalGazHistorize')->event($heatingGazConsumptions['day'][1], $dateVeille);
                     }
                     $this->setCache('oldConsoTotal', $conso);
 
-                    $day = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($day !== '') {
-                            $day = ',' . $day;
+                    foreach ($periods as $period) {
+                        $values = implode(',', array_reverse($heatingGazConsumptions[$period]));
+                        $obj = $this->getCmd(null, "totalGazConsumption" . ucfirst($period));
+                        if (is_object($obj)) {
+                            $obj->event($values);
                         }
-                        $day = $heatingGazConsumption . $day;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'totalGazConsumptionDay');
-                    if (is_object($obj)) {
-                        $obj->event($day);
-                    }
-
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['week']['value']);
-                    if ($n > 7) {
-                        $n = 7;
-                    }
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['week']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $week = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($week !== '') {
-                            $week = ',' . $week;
-                        }
-                        $week = $heatingGazConsumption . $week;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'totalGazConsumptionWeek');
-                    if (is_object($obj)) {
-                        $obj->event($week);
-                    }
-
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['month']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['month']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $month = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($month !== '') {
-                            $month = ',' . $month;
-                        }
-                        $month = $heatingGazConsumption . $month;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'totalGazConsumptionMonth');
-                    if (is_object($obj)) {
-                        $obj->event($month);
-                    }
-
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['year']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['year']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $year = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($year !== '') {
-                            $year = ',' . $year;
-                        }
-                        $year = $heatingGazConsumption . $year;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'totalGazConsumptionYear');
-                    if (is_object($obj)) {
-                        $obj->event($year);
                     }
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_DHW) {
                     $bConsumptionSeen = true;
 
-                    $dhwGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['day']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwGazConsumptions[$j] = $features["data"][$i]["properties"]['day']['value'][$j] * $facteurConversionGaz;
-                    }
-                    $this->getCmd(null, 'dhwGazConsumption')->event($dhwGazConsumptions[0]);
+                    $periods = ['day', 'week', 'month', 'year'];
+                    $dhwGazConsumptions = [];
 
-                    $conso = $dhwGazConsumptions[0];
+                    foreach ($periods as $period) {
+                        $values = $features["data"][$i]["properties"][$period]['value'];
+                        $dhwGazConsumptions[$period] = array_map(function($value) use ($facteurConversionGaz) {
+                            return $value * $facteurConversionGaz;
+                        }, $values);
+                    }
+
+                    $this->getCmd(null, 'dhwGazConsumption')->event($dhwGazConsumptions['day'][0]);
+
+                    $conso = $dhwGazConsumptions['day'][0];
                     $oldConso = $this->getCache('oldConsoDhw', -1);
                     if ($oldConso >= $conso) {
-                        $dateVeille = time() - 24 * 60 * 60;
-                        $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                        $this->getCmd(null, 'dhwGazHistorize')->event($dhwGazConsumptions[1], $dateVeille);
+                        $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                        $this->getCmd(null, 'dhwGazHistorize')->event($dhwGazConsumptions['day'][1], $dateVeille);
                     }
                     $this->setCache('oldConsoDhw', $conso);
 
-                    $day = '';
-                    $n = 0;
-                    foreach ($dhwGazConsumptions as $dhwGazConsumption) {
-                        if ($day !== '') {
-                            $day = ',' . $day;
+                    foreach ($periods as $period) {
+                        $values = implode(',', array_reverse($dhwGazConsumptions[$period]));
+                        $obj = $this->getCmd(null, "dhwGazConsumption" . ucfirst($period));
+                        if (is_object($obj)) {
+                            $obj->event($values);
                         }
-                        $day = $dhwGazConsumption . $day;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionDay');
-                    if (is_object($obj)) {
-                        $obj->event($day);
-                    }
-
-                    $dhwGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['week']['value']);
-                    if ($n > 7) {
-                        $n = 7;
-                    }
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwGazConsumptions[$j] = $features["data"][$i]["properties"]['week']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $week = '';
-                    $n = 0;
-                    foreach ($dhwGazConsumptions as $dhwGazConsumption) {
-                        if ($week !== '') {
-                            $week = ',' . $week;
-                        }
-                        $week = $dhwGazConsumption . $week;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionWeek');
-                    if (is_object($obj)) {
-                        $obj->event($week);
-                    }
-
-                    $dhwGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['month']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwGazConsumptions[$j] = $features["data"][$i]["properties"]['month']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $month = '';
-                    $n = 0;
-                    foreach ($dhwGazConsumptions as $dhwGazConsumption) {
-                        if ($month !== '') {
-                            $month = ',' . $month;
-                        }
-                        $month = $dhwGazConsumption . $month;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionMonth');
-                    if (is_object($obj)) {
-                        $obj->event($month);
-                    }
-
-                    $dhwGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['year']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwGazConsumptions[$j] = $features["data"][$i]["properties"]['year']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $year = '';
-                    $n = 0;
-                    foreach ($dhwGazConsumptions as $dhwGazConsumption) {
-                        if ($year !== '') {
-                            $year = ',' . $year;
-                        }
-                        $year = $dhwGazConsumption . $year;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'dhwGazConsumptionYear');
-                    if (is_object($obj)) {
-                        $obj->event($year);
                     }
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_HEATING) {
                     $bConsumptionSeen = true;
 
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['day']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['day']['value'][$j] * $facteurConversionGaz;
-                    }
-                    $this->getCmd(null, 'heatingGazConsumption')->event($heatingGazConsumptions[0]);
+                    $periods = ['day', 'week', 'month', 'year'];
+                    $heatingGazConsumptions = [];
 
-                    $conso = $heatingGazConsumptions[0];
+                    foreach ($periods as $period) {
+                        $values = $features["data"][$i]["properties"][$period]['value'];
+                        $heatingGazConsumptions[$period] = array_map(function($value) use ($facteurConversionGaz) {
+                            return $value * $facteurConversionGaz;
+                        }, $values);
+                    }
+
+                    $this->getCmd(null, 'heatingGazConsumption')->event($heatingGazConsumptions['day'][0]);
+
+                    $conso = $heatingGazConsumptions['day'][0];
                     $oldConso = $this->getCache('oldConsoHeating', -1);
                     if ($oldConso >= $conso) {
-                        $dateVeille = time() - 24 * 60 * 60;
-                        $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                        $this->getCmd(null, 'heatingGazHistorize')->event($heatingGazConsumptions[1], $dateVeille);
+                        $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                        $this->getCmd(null, 'heatingGazHistorize')->event($heatingGazConsumptions['day'][1], $dateVeille);
                     }
                     $this->setCache('oldConsoHeating', $conso);
 
-                    $day = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($day !== '') {
-                            $day = ',' . $day;
+                    foreach ($periods as $period) {
+                        $values = implode(',', array_reverse($heatingGazConsumptions[$period]));
+                        $obj = $this->getCmd(null, "heatingGazConsumption" . ucfirst($period));
+                        if (is_object($obj)) {
+                            $obj->event($values);
                         }
-                        $day = $heatingGazConsumption . $day;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionDay');
-                    if (is_object($obj)) {
-                        $obj->event($day);
-                    }
-
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['week']['value']);
-                    if ($n > 7) {
-                        $n = 7;
-                    }
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['week']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $week = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($week !== '') {
-                            $week = ',' . $week;
-                        }
-                        $week = $heatingGazConsumption . $week;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionWeek');
-                    if (is_object($obj)) {
-                        $obj->event($week);
-                    }
-
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['month']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['month']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $month = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($month !== '') {
-                            $month = ',' . $month;
-                        }
-                        $month = $heatingGazConsumption . $month;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionMonth');
-                    if (is_object($obj)) {
-                        $obj->event($month);
-                    }
-
-                    $heatingGazConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['year']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingGazConsumptions[$j] = $features["data"][$i]["properties"]['year']['value'][$j] * $facteurConversionGaz;
-                    }
-
-                    $year = '';
-                    $n = 0;
-                    foreach ($heatingGazConsumptions as $heatingGazConsumption) {
-                        if ($year !== '') {
-                            $year = ',' . $year;
-                        }
-                        $year = $heatingGazConsumption . $year;
-                        $n++;
-                    }
-                    $obj = $this->getCmd(null, 'heatingGazConsumptionYear');
-                    if (is_object($obj)) {
-                        $obj->event($year);
                     }
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_TOTAL) {
                     $bConsumptionSeen = true;
 
-                    $totalPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['day']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $totalPowerConsumptions[$j] = $features["data"][$i]["properties"]['day']['value'][$j];
-                    }
-                    $this->getCmd(null, 'totalPowerConsumption')->event($totalPowerConsumptions[0]);
+                    $periods = ['day', 'week', 'month', 'year'];
+                    $totalPowerConsumptions = [];
 
-                    $conso = $totalPowerConsumptions[0];
+                    foreach ($periods as $period) {
+                        $values = $features["data"][$i]["properties"][$period]['value'];
+                        $totalPowerConsumptions[$period] = array_map('floatval', $values);
+                    }
+
+                    $this->getCmd(null, 'totalPowerConsumption')->event($totalPowerConsumptions['day'][0]);
+
+                    $conso = $totalPowerConsumptions['day'][0];
                     $oldConso = $this->getCache('oldConsoPowerTotal', -1);
                     if ($oldConso >= $conso) {
-                        $dateVeille = time() - 24 * 60 * 60;
-                        $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                        $this->getCmd(null, 'totalPowerHistorize')->event($totalPowerConsumptions[1], $dateVeille);
+                        $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                        $this->getCmd(null, 'totalPowerHistorize')->event($totalPowerConsumptions['day'][1], $dateVeille);
                     }
                     $this->setCache('oldConsoPowerTotal', $conso);
 
-                    $day = '';
-                    foreach ($totalPowerConsumptions as $totalPowerConsumption) {
-                        if ($day !== '') {
-                            $day = ',' . $day;
-                        }
-                        $day = $totalPowerConsumption . $day;
-                    }
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionDay');
-                    if (is_object($obj)) {
-                        $obj->event($day);
-                    }
-
-                    $totalPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['week']['value']);
-                    if ($n > 7) {
-                        $n = 7;
-                    }
-                    for ($j = 0; $j < $n; $j++) {
-                        $totalPowerConsumptions[$j] = $features["data"][$i]["properties"]['week']['value'][$j];
-                    }
-                    $week = '';
-                    foreach ($totalPowerConsumptions as $totalPowerConsumption) {
-                        if ($week !== '') {
-                            $week = ',' . $week;
-                        }
-                        $week = $totalPowerConsumption . $week;
-                    }
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionWeek');
-                    if (is_object($obj)) {
-                        $obj->event($week);
-                    }
-
-                    $totalPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['month']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $totalPowerConsumptions[$j] = $features["data"][$i]["properties"]['month']['value'][$j];
-                    }
-                    $month = '';
-                    foreach ($totalPowerConsumptions as $totalPowerConsumption) {
-                        if ($month !== '') {
-                            $month = ',' . $month;
-                        }
-                        $month = $totalPowerConsumption . $month;
-                    }
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionMonth');
-                    if (is_object($obj)) {
-                        $obj->event($month);
-                    }
-
-                    $totalPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['year']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $totalPowerConsumptions[$j] = $features["data"][$i]["properties"]['year']['value'][$j];
-                    }
-                    $year = '';
-                    foreach ($totalPowerConsumptions as $totalPowerConsumption) {
-                        if ($year !== '') {
-                            $year = ',' . $year;
-                        }
-                        $year = $totalPowerConsumption . $year;
-                    }
-                    $obj = $this->getCmd(null, 'totalPowerConsumptionYear');
-                    if (is_object($obj)) {
-                        $obj->event($year);
+                    foreach ($periods as $period) {
+                        $values = implode(',', array_reverse($totalPowerConsumptions[$period]));
+                        $this->getCmd(null, "totalPowerConsumption" . ucfirst($period))->event($values);
                     }
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_DHW) {
                     $bConsumptionSeen = true;
 
-                    $dhwPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['day']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwPowerConsumptions[$j] = $features["data"][$i]["properties"]['day']['value'][$j];
-                    }
-                    $this->getCmd(null, 'dhwPowerConsumption')->event($dhwPowerConsumptions[0]);
+                    $periods = ['day', 'week', 'month', 'year'];
+                    $dhwPowerConsumptions = [];
 
-                    $conso = $dhwPowerConsumptions[0];
+                    foreach ($periods as $period) {
+                        $values = $features["data"][$i]["properties"][$period]['value'];
+                        $dhwPowerConsumptions[$period] = array_map('floatval', $values);
+                    }
+
+                    $this->getCmd(null, 'dhwPowerConsumption')->event($dhwPowerConsumptions['day'][0]);
+
+                    $conso = $dhwPowerConsumptions['day'][0];
                     $oldConso = $this->getCache('oldConsoPowerDhw', -1);
                     if ($oldConso >= $conso) {
-                        $dateVeille = time() - 24 * 60 * 60;
-                        $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                        $this->getCmd(null, 'dhwPowerHistorize')->event($dhwPowerConsumptions[1], $dateVeille);
+                        $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                        $this->getCmd(null, 'dhwPowerHistorize')->event($dhwPowerConsumptions['day'][1], $dateVeille);
                     }
                     $this->setCache('oldConsoPowerDhw', $conso);
 
-                    $day = '';
-                    foreach ($dhwPowerConsumptions as $dhwPowerConsumption) {
-                        if ($day !== '') {
-                            $day = ',' . $day;
+                    foreach ($periods as $period) {
+                        $values = implode(',', array_reverse($dhwPowerConsumptions[$period]));
+                        $obj = $this->getCmd(null, "dhwPowerConsumption" . ucfirst($period));
+                        if (is_object($obj)) {
+                            $obj->event($values);
                         }
-                        $day = $dhwPowerConsumption . $day;
-                    }
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionDay');
-                    if (is_object($obj)) {
-                        $obj->event($day);
-                    }
-
-                    $dhwPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['week']['value']);
-                    if ($n > 7) {
-                        $n = 7;
-                    }
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwPowerConsumptions[$j] = $features["data"][$i]["properties"]['week']['value'][$j];
-                    }
-                    $week = '';
-                    foreach ($dhwPowerConsumptions as $dhwPowerConsumption) {
-                        if ($week !== '') {
-                            $week = ',' . $week;
-                        }
-                        $week = $dhwPowerConsumption . $week;
-                    }
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionWeek');
-                    if (is_object($obj)) {
-                        $obj->event($week);
-                    }
-
-                    $dhwPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['month']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwPowerConsumptions[$j] = $features["data"][$i]["properties"]['month']['value'][$j];
-                    }
-                    $month = '';
-                    foreach ($dhwPowerConsumptions as $dhwPowerConsumption) {
-                        if ($month !== '') {
-                            $month = ',' . $month;
-                        }
-                        $month = $dhwPowerConsumption . $month;
-                    }
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionMonth');
-                    if (is_object($obj)) {
-                        $obj->event($month);
-                    }
-
-                    $dhwPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['year']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $dhwPowerConsumptions[$j] = $features["data"][$i]["properties"]['year']['value'][$j];
-                    }
-                    $year = '';
-                    foreach ($dhwPowerConsumptions as $dhwPowerConsumption) {
-                        if ($year !== '') {
-                            $year = ',' . $year;
-                        }
-                        $year = $dhwPowerConsumption . $year;
-                    }
-                    $obj = $this->getCmd(null, 'dhwPowerConsumptionYear');
-                    if (is_object($obj)) {
-                        $obj->event($year);
                     }
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_HEATING) {
                     $bConsumptionSeen = true;
 
-                    $heatingPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['day']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingPowerConsumptions[$j] = $features["data"][$i]["properties"]['day']['value'][$j];
-                    }
-                    $this->getCmd(null, 'heatingPowerConsumption')->event($heatingPowerConsumptions[0]);
+                    $periods = ['day', 'week', 'month', 'year'];
+                    $heatingPowerConsumptions = [];
 
-                    $conso = $heatingPowerConsumptions[0];
+                    foreach ($periods as $period) {
+                        $values = $features["data"][$i]["properties"][$period]['value'];
+                        $heatingPowerConsumptions[$period] = array_map('floatval', $values);
+                    }
+
+                    $this->getCmd(null, 'heatingPowerConsumption')->event($heatingPowerConsumptions['day'][0]);
+
+                    $conso = $heatingPowerConsumptions['day'][0];
                     $oldConso = $this->getCache('oldConsoPowerHeating', -1);
                     if ($oldConso >= $conso) {
-                        $dateVeille = time() - 24 * 60 * 60;
-                        $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                        $this->getCmd(null, 'heatingPowerHistorize')->event($heatingPowerConsumptions[1], $dateVeille);
+                        $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                        $this->getCmd(null, 'heatingPowerHistorize')->event($heatingPowerConsumptions['day'][1], $dateVeille);
                     }
                     $this->setCache('oldConsoPowerHeating', $conso);
 
-                    $day = '';
-                    foreach ($heatingPowerConsumptions as $heatingPowerConsumption) {
-                        if ($day !== '') {
-                            $day = ',' . $day;
+                    foreach ($periods as $period) {
+                        $values = implode(',', array_reverse($heatingPowerConsumptions[$period]));
+                        $obj = $this->getCmd(null, "heatingPowerConsumption" . ucfirst($period));
+                        if (is_object($obj)) {
+                            $obj->event($values);
                         }
-                        $day = $heatingPowerConsumption . $day;
-                    }
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionDay');
-                    if (is_object($obj)) {
-                        $obj->event($day);
-                    }
-
-                    $heatingPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['week']['value']);
-                    if ($n > 7) {
-                        $n = 7;
-                    }
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingPowerConsumptions[$j] = $features["data"][$i]["properties"]['week']['value'][$j];
-                    }
-                    $week = '';
-                    foreach ($heatingPowerConsumptions as $heatingPowerConsumption) {
-                        if ($week !== '') {
-                            $week = ',' . $week;
-                        }
-                        $week = $heatingPowerConsumption . $week;
-                    }
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionWeek');
-                    if (is_object($obj)) {
-                        $obj->event($week);
-                    }
-
-                    $heatingPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['month']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingPowerConsumptions[$j] = $features["data"][$i]["properties"]['month']['value'][$j];
-                    }
-                    $month = '';
-                    foreach ($heatingPowerConsumptions as $heatingPowerConsumption) {
-                        if ($month !== '') {
-                            $month = ',' . $month;
-                        }
-                        $month = $heatingPowerConsumption . $month;
-                    }
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionMonth');
-                    if (is_object($obj)) {
-                        $obj->event($month);
-                    }
-
-                    $heatingPowerConsumptions = array();
-                    $n = count($features["data"][$i]["properties"]['year']['value']);
-                    for ($j = 0; $j < $n; $j++) {
-                        $heatingPowerConsumptions[$j] = $features["data"][$i]["properties"]['year']['value'][$j];
-                    }
-                    $year = '';
-                    foreach ($heatingPowerConsumptions as $heatingPowerConsumption) {
-                        if ($year !== '') {
-                            $year = ',' . $year;
-                        }
-                        $year = $heatingPowerConsumption . $year;
-                    }
-                    $obj = $this->getCmd(null, 'heatingPowerConsumptionYear');
-                    if (is_object($obj)) {
-                        $obj->event($year);
                     }
                 } elseif ($features["data"][$i]["feature"] == self::HEATING_SERVICE_TIMEBASED) {
                     $val = $features["data"][$i]["properties"]["lastService"]["value"];
@@ -1727,327 +1243,135 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             }
         }
 
-        if ($bConsumptionSeen == false) {
+        if (!$bConsumptionSeen) {
+            $gasSummary = [
+            'dayTotal' => 0, 'weekTotal' => 0, 'monthTotal' => 0, 'yearTotal' => 0,
+            'dayHeating' => 0, 'weekHeating' => 0, 'monthHeating' => 0, 'yearHeating' => 0,
+            'dayDhw' => 0, 'weekDhw' => 0, 'monthDhw' => 0, 'yearDhw' => 0
+            ];
 
-            $gasSummaryDayTotal = $gasSummaryWeekTotal = $gasSummaryMonthTotal = $gasSummaryYearTotal = 0;
-            $gasSummaryDayHeating = $gasSummaryWeekHeating = $gasSummaryMonthHeating = $gasSummaryYearHeating = 0;
-            $gasSummaryDayDhw = $gasSummaryWeekDhw = $gasSummaryMonthDhw = $gasSummaryYearDhw = 0;
+            $powerSummary = [
+            'dayTotal' => 0, 'weekTotal' => 0, 'monthTotal' => 0, 'yearTotal' => 0,
+            'dayHeating' => 0, 'weekHeating' => 0, 'monthHeating' => 0, 'yearHeating' => 0,
+            'dayDhw' => 0, 'weekDhw' => 0, 'monthDhw' => 0, 'yearDhw' => 0
+            ];
 
-            $powerSummaryDayTotal = $gasSummaryWeekTotal = $gasSummaryMonthTotal = $gasSummaryYearTotal = 0;
-            $powerSummaryDayHeating = $gasSummaryWeekHeating = $gasSummaryMonthHeating = $gasSummaryYearHeating = 0;
-            $powerSummaryDayDhw = $gasSummaryWeekDhw = $gasSummaryMonthDhw = $gasSummaryYearDhw = 0;
+            foreach ($features["data"] as $feature) {
+            $properties = $feature["properties"];
+            switch ($feature["feature"]) {
+                case self::HEATING_GAS_CONSUMPTION_SUMMARY_TOTAL:
+                $gasSummary['dayTotal'] = $properties['currentDay']['value'];
+                $gasSummary['weekTotal'] = $properties['lastSevenDays']['value'];
+                $gasSummary['monthTotal'] = $properties['currentMonth']['value'];
+                $gasSummary['yearTotal'] = $properties['currentYear']['value'];
+                break;
+                case self::HEATING_GAS_CONSUMPTION_SUMMARY_HEATING:
+                $gasSummary['dayHeating'] = $properties['currentDay']['value'];
+                $gasSummary['weekHeating'] = $properties['lastSevenDays']['value'];
+                $gasSummary['monthHeating'] = $properties['currentMonth']['value'];
+                $gasSummary['yearHeating'] = $properties['currentYear']['value'];
+                break;
+                case self::HEATING_GAS_CONSUMPTION_SUMMARY_DHW:
+                $gasSummary['dayDhw'] = $properties['currentDay']['value'];
+                $gasSummary['weekDhw'] = $properties['lastSevenDays']['value'];
+                $gasSummary['monthDhw'] = $properties['currentMonth']['value'];
+                $gasSummary['yearDhw'] = $properties['currentYear']['value'];
+                break;
+                case self::HEATING_POWER_CONSUMPTION_SUMMARY_TOTAL:
+                $powerSummary['dayTotal'] = $properties['currentDay']['value'];
+                $powerSummary['weekTotal'] = $properties['lastSevenDays']['value'];
+                $powerSummary['monthTotal'] = $properties['currentMonth']['value'];
+                $powerSummary['yearTotal'] = $properties['currentYear']['value'];
+                break;
+                case self::HEATING_POWER_CONSUMPTION_SUMMARY_HEATING:
+                $powerSummary['dayHeating'] = $properties['currentDay']['value'];
+                $powerSummary['weekHeating'] = $properties['lastSevenDays']['value'];
+                $powerSummary['monthHeating'] = $properties['currentMonth']['value'];
+                $powerSummary['yearHeating'] = $properties['currentYear']['value'];
+                break;
+                case self::HEATING_POWER_CONSUMPTION_SUMMARY_DHW:
+                $powerSummary['dayDhw'] = $properties['currentDay']['value'];
+                $powerSummary['weekDhw'] = $properties['lastSevenDays']['value'];
+                $powerSummary['monthDhw'] = $properties['currentMonth']['value'];
+                $powerSummary['yearDhw'] = $properties['currentYear']['value'];
+                break;
+            }
+            }
 
-            for ($i = 0; $i < $nbrFeatures; $i++) {
-                if ($features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_SUMMARY_TOTAL) {
-                    $gasSummaryDayTotal = $features["data"][$i]["properties"]['currentDay']['value'];
-                    $gasSummaryWeekTotal = $features["data"][$i]["properties"]['lastSevenDays']['value'];
-                    $gasSummaryMonthTotal = $features["data"][$i]["properties"]['currentMonth']['value'];
-                    $gasSummaryYearTotal = $features["data"][$i]["properties"]['currentYear']['value'];
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_SUMMARY_HEATING) {
-                    $gasSummaryDayHeating = $features["data"][$i]["properties"]['currentDay']['value'];
-                    $gasSummaryWeekHeating = $features["data"][$i]["properties"]['lastSevenDays']['value'];
-                    $gasSummaryMonthHeating = $features["data"][$i]["properties"]['currentMonth']['value'];
-                    $gasSummaryYearHeating = $features["data"][$i]["properties"]['currentYear']['value'];
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_GAS_CONSUMPTION_SUMMARY_DHW) {
-                    $gasSummaryDayDhw = $features["data"][$i]["properties"]['currentDay']['value'];
-                    $gasSummaryWeekDhw = $features["data"][$i]["properties"]['lastSevenDays']['value'];
-                    $gasSummaryMonthDhw = $features["data"][$i]["properties"]['currentMonth']['value'];
-                    $gasSummaryYearDhw = $features["data"][$i]["properties"]['currentYear']['value'];
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_SUMMARY_TOTAL) {
-                    $powerSummaryDayTotal = $features["data"][$i]["properties"]['currentDay']['value'];
-                    $powerSummaryWeekTotal = $features["data"][$i]["properties"]['lastSevenDays']['value'];
-                    $powerSummaryMonthTotal = $features["data"][$i]["properties"]['currentMonth']['value'];
-                    $powerSummaryYearTotal = $features["data"][$i]["properties"]['currentYear']['value'];
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_SUMMARY_HEATING) {
-                    $powerSummaryDayHeating = $features["data"][$i]["properties"]['currentDay']['value'];
-                    $powerSummaryWeekHeating = $features["data"][$i]["properties"]['lastSevenDays']['value'];
-                    $powerSummaryMonthHeating = $features["data"][$i]["properties"]['currentMonth']['value'];
-                    $powerSummaryYearHeating = $features["data"][$i]["properties"]['currentYear']['value'];
-                } elseif ($features["data"][$i]["feature"] == self::HEATING_POWER_CONSUMPTION_SUMMARY_DHW) {
-                    $powerSummaryDayDhw = $features["data"][$i]["properties"]['currentDay']['value'];
-                    $powerSummaryWeekDhw = $features["data"][$i]["properties"]['lastSevenDays']['value'];
-                    $powerSummaryMonthDhw = $features["data"][$i]["properties"]['currentMonth']['value'];
-                    $powerSummaryYearDhw = $features["data"][$i]["properties"]['currentYear']['value'];
+            foreach (['Total', 'Heating', 'Dhw'] as $type) {
+            foreach (['day', 'week', 'month', 'year'] as $period) {
+                if ($gasSummary["{$period}{$type}"] == 0) {
+                $gasSummary["{$period}{$type}"] = $gasSummary["{$period}Dhw"] + $gasSummary["{$period}Heating"];
+                }
+                if ($powerSummary["{$period}{$type}"] == 0) {
+                $powerSummary["{$period}{$type}"] = $powerSummary["{$period}Dhw"] + $powerSummary["{$period}Heating"];
                 }
             }
-
-            if ($gasSummaryDayTotal == 0) {
-                $gasSummaryDayTotal = $gasSummaryDayDhw + $gasSummaryDayHeating;
             }
 
-            if ($gasSummaryWeekTotal == 0) {
-                $gasSummaryWeekTotal = $gasSummaryWeekDhw + $gasSummaryWeekHeating;
+            foreach (['Dhw', 'Heating', 'Total'] as $type) {
+            foreach (['day', 'week', 'month', 'year'] as $period) {
+                $gasSummary["{$period}{$type}"] *= $facteurConversionGaz;
+            }
             }
 
-            if ($gasSummaryMonthTotal == 0) {
-                $gasSummaryMonthTotal = $gasSummaryMonthDhw + $gasSummaryMonthHeating;
-            }
-
-            if ($gasSummaryYearTotal == 0) {
-                $gasSummaryYearTotal = $gasSummaryYearDhw + $gasSummaryYearHeating;
-            }
-
-            if ($powerSummaryDayTotal == 0) {
-                $powerSummaryDayTotal = $powerSummaryDayDhw + $powerSummaryDayHeating;
-            }
-
-            if ($powerSummaryWeekTotal == 0) {
-                $powerSummaryWeekTotal = $powerSummaryWeekDhw + $powerSummaryWeekHeating;
-            }
-
-            if ($powerSummaryMonthTotal == 0) {
-                $powerSummaryMonthTotal = $powerSummarMonthDhw + $powerSummaryMonthHeating;
-            }
-
-            if ($powerSummaryYearTotal == 0) {
-                $powerSummaryYearTotal = $powerSummaryYearDhw + $powerSummaryYearHeating;
-            }
-
-            $gasSummaryDayDhw *= $facteurConversionGaz;
-            $gasSummaryWeekDhw *= $facteurConversionGaz;
-            $gasSummaryMonthDhw *= $facteurConversionGaz;
-            $gasSummaryYearDhw *= $facteurConversionGaz;
-
-            $gasSummaryDayHeating *= $facteurConversionGaz;
-            $gasSummaryWeekHeating *= $facteurConversionGaz;
-            $gasSummaryMonthHeating *= $facteurConversionGaz;
-            $gasSummaryYearHeating *= $facteurConversionGaz;
-
-            $gasSummaryDayTotal *= $facteurConversionGaz;
-            $gasSummaryWeekTotal *= $facteurConversionGaz;
-            $gasSummaryMonthTotal *= $facteurConversionGaz;
-            $gasSummaryYearTotal *= $facteurConversionGaz;
-
-            $conso = $gasSummaryDayDhw;
-            $oldConso = $this->getCache('oldConsoDhw', -1);
+            foreach (['Dhw', 'Heating', 'Total'] as $type) {
+            $conso = $gasSummary["day{$type}"];
+            $oldConso = $this->getCache("oldConso{$type}", -1);
             if ($oldConso >= $conso) {
-                $dateVeille = time() - 24 * 60 * 60;
-                $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                $this->getCmd(null, 'dhwGazHistorize')->event($gasSummaryDayDhw, $dateVeille);
+                $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                $this->getCmd(null, "{$type}GazHistorize")->event($conso, $dateVeille);
             }
-            $this->setCache('oldConsoDhw', $conso);
+            $this->setCache("oldConso{$type}", $conso);
 
-            $conso = $gasSummaryDayHeating;
-            $oldConso = $this->getCache('oldConsoHeating', -1);
+            $conso = $powerSummary["day{$type}"];
+            $oldConso = $this->getCache("oldConsoPower{$type}", -1);
             if ($oldConso >= $conso) {
-                $dateVeille = time() - 24 * 60 * 60;
-                $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                $this->getCmd(null, 'heatingGazHistorize')->event($gasSummaryDayHeating, $dateVeille);
+                $dateVeille = date('Y-m-d 00:00:00', time() - 24 * 60 * 60);
+                $this->getCmd(null, "{$type}PowerHistorize")->event($conso, $dateVeille);
             }
-            $this->setCache('oldConsoHeating', $conso);
-
-            $conso = $gasSummaryDayTotal;
-            $oldConso = $this->getCache('oldConsoTotal', -1);
-            if ($oldConso >= $conso) {
-                $dateVeille = time() - 24 * 60 * 60;
-                $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                $this->getCmd(null, 'totalGazHistorize')->event($gasSummaryDayTotal, $dateVeille);
-            }
-            $this->setCache('oldConsoTotal', $conso);
-
-            $conso = $powerSummaryDayDhw;
-            $oldConso = $this->getCache('oldConsoPowerDhw', -1);
-            if ($oldConso >= $conso) {
-                $dateVeille = time() - 24 * 60 * 60;
-                $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                $this->getCmd(null, 'dhwPowerHistorize')->event($powerSummaryDayDhw, $dateVeille);
-            }
-            $this->setCache('oldConsoPowerDhw', $conso);
-
-            $conso = $powerSummaryDayHeating;
-            $oldConso = $this->getCache('oldConsoPowerHeating', -1);
-            if ($oldConso >= $conso) {
-                $dateVeille = time() - 24 * 60 * 60;
-                $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                $this->getCmd(null, 'heatingPowerHistorize')->event($powerSummaryDayHeating, $dateVeille);
-            }
-            $this->setCache('oldConsoPowerHeating', $conso);
-
-            $conso = $powerSummaryDayTotal;
-            $oldConso = $this->getCache('oldConsoPowerTotal', -1);
-            if ($oldConso >= $conso) {
-                $dateVeille = time() - 24 * 60 * 60;
-                $dateVeille = date('Y-m-d 00:00:00', $dateVeille);
-                $this->getCmd(null, 'totalPowerHistorize')->event($powerSummaryDayTotal, $dateVeille);
-            }
-            $this->setCache('oldConsoPowerTotal', $conso);
-
-            $this->getCmd(null, 'totalGazConsumption')->event($gasSummaryDayTotal);
-            $this->getCmd(null, 'dhwGazConsumption')->event($gasSummaryDayDhw);
-            $this->getCmd(null, 'heatingGazConsumption')->event($gasSummaryDayHeating);
-
-            $this->getCmd(null, 'totalPowerConsumption')->event($powerSummaryDayTotal);
-            $this->getCmd(null, 'dhwPowerConsumption')->event($powerSummaryDayDhw);
-            $this->getCmd(null, 'heatingPowerConsumption')->event($powerSummaryDayHeating);
-
-            $obj = $this->getCmd(null, 'dhwGazConsumptionDay');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryDayDhw);
+            $this->setCache("oldConsoPower{$type}", $conso);
             }
 
-            $obj = $this->getCmd(null, 'dhwGazConsumptionWeek');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryWeekDhw);
+            foreach (['Total', 'Dhw', 'Heating'] as $type) {
+            $this->getCmd(null, "total{$type}Consumption")->event($gasSummary["day{$type}"]);
+            $this->getCmd(null, "totalPowerConsumption")->event($powerSummary["day{$type}"]);
             }
 
-            $obj = $this->getCmd(null, 'dhwGazConsumptionMonth');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryMonthDhw);
+            foreach (['day', 'week', 'month', 'year'] as $period) {
+            foreach (['Dhw', 'Heating', 'Total'] as $type) {
+                $this->getCmd(null, "{$type}GazConsumption{$period}")->event($gasSummary["{$period}{$type}"]);
+                $this->getCmd(null, "{$type}PowerConsumption{$period}")->event($powerSummary["{$period}{$type}"]);
             }
-
-            $obj = $this->getCmd(null, 'dhwGazConsumptionYear');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryYearDhw);
-            }
-
-            $obj = $this->getCmd(null, 'heatingGazConsumptionDay');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryDayHeating);
-            }
-
-            $obj = $this->getCmd(null, 'heatingGazConsumptionWeek');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryWeekHeating);
-            }
-
-            $obj = $this->getCmd(null, 'heatingGazConsumptionMonth');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryMonthHeating);
-            }
-
-            $obj = $this->getCmd(null, 'heatingGazConsumptionYear');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryYearHeating);
-            }
-
-            $obj = $this->getCmd(null, 'totalGazConsumptionDay');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryDayTotal);
-            }
-
-            $obj = $this->getCmd(null, 'totalGazConsumptionWeek');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryWeekTotal);
-            }
-
-            $obj = $this->getCmd(null, 'totalGazConsumptionMonth');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryMonthTotal);
-            }
-
-            $obj = $this->getCmd(null, 'totalGazConsumptionYear');
-            if (is_object($obj)) {
-                $obj->event($gasSummaryYearTotal);
-            }
-
-            $obj = $this->getCmd(null, 'dhwPowerConsumptionDay');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryDayDhw);
-            }
-
-            $obj = $this->getCmd(null, 'dhwPowerConsumptionWeek');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryWeekDhw);
-            }
-
-            $obj = $this->getCmd(null, 'dhwPowerConsumptionMonth');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryMonthDhw);
-            }
-
-            $obj = $this->getCmd(null, 'dhwPowerConsumptionYear');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryYearDhw);
-            }
-
-            $obj = $this->getCmd(null, 'heatingPowerConsumptionDay');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryDayHeating);
-            }
-
-            $obj = $this->getCmd(null, 'heatingPowerConsumptionWeek');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryWeekHeating);
-            }
-
-            $obj = $this->getCmd(null, 'heatingPowerConsumptionMonth');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryMonthHeating);
-            }
-
-            $obj = $this->getCmd(null, 'heatingPowerConsumptionYear');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryYearHeating);
-            }
-
-            $obj = $this->getCmd(null, 'totalPowerConsumptionDay');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryDayTotal);
-            }
-
-            $obj = $this->getCmd(null, 'totalPowerConsumptionWeek');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryWeekTotal);
-            }
-
-            $obj = $this->getCmd(null, 'totalPowerConsumptionMonth');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryMonthTotal);
-            }
-
-            $obj = $this->getCmd(null, 'totalPowerConsumptionYear');
-            if (is_object($obj)) {
-                $obj->event($powerSummaryYearTotal);
             }
         }
 
         $maintenant = time();
         $minute = date("i", $maintenant);
-        if (($minute == 0) || ($viessmannApi->getLogFeatures() == 'Oui')) {
+        if ($minute == 0 || $viessmannApi->getLogFeatures() == 'Oui') {
             $viessmannApi->getEvents();
             $events = $viessmannApi->getArrayEvents();
             $nbrEvents = count($events["data"]);
-            for ($i = $nbrEvents - 1; $i >= 0; $i--) {
-                if ($events["data"][$i]["eventType"] == "device-error") {
-                    $timeStamp = substr($events["data"][$i]['eventTimestamp'], 0, 19);
-                    $timeStamp = str_replace('T', ' ', $timeStamp) . ' GMT';
-                    $timeZone = 'Europe/Warsaw';  // +2 hours
+            $timeZone = new DateTimeZone('Europe/Warsaw');  // +2 hours
 
-                    $dateTime = new DateTime($timeStamp);
-                    $dateTime->setTimeZone(new DateTimeZone($timeZone));
+            foreach (array_reverse($events["data"]) as $event) {
+            if ($event["eventType"] == "device-error") {
+                $dateTime = new DateTime(str_replace('T', ' ', substr($event['eventTimestamp'], 0, 19)) . ' GMT');
+                $dateTime->setTimeZone($timeZone);
+                $timeStamp = $dateTime->format('d/m/Y H:i:s');
 
-                    $timeStamp = $dateTime->format('d/m/Y H:i:s');
+                $errorCode = $event['body']['errorCode'];
+                $errorDescription = str_replace(["'", '"'], ["\'", '\"'], $event['body']['equipmentType'] . ':' . $event['body']['errorDescription']);
 
-                    $errorCode = $events["data"][$i]['body']['errorCode'];
-                    $errorDescription = $events["data"][$i]['body']['equipmentType'] . ':' . $events["data"][$i]['body']['errorDescription'];
-                    $errorDescription = str_replace("'", "\'", $errorDescription);
-                    $errorDescription = str_replace('"', "\"", $errorDescription);
-
-                    if ($nbr < 10) {
-                        if ($nbr > 0) {
-                            $erreurs .= ';';
-                        }
-                        if ($events["data"][$i]['body']['active'] == true) {
-                            $erreurs .= 'AC;' . $timeStamp . ';' . $errorDescription;
-                            $erreurCourante = $errorCode;
-                        } else {
-                            $erreurs .= 'IN;' . $timeStamp . ';' . $errorDescription;
-                            if ($erreurCourante == $errorCode) {
-                                $erreurCourante = '';
-                            }
-                        }
-                        $nbr++;
-                    }
+                if ($nbr < 10) {
+                $erreurs .= ($nbr > 0 ? ';' : '') . ($event['body']['active'] ? 'AC;' : 'IN;') . $timeStamp . ';' . $errorDescription;
+                $erreurCourante = $event['body']['active'] ? $errorCode : ($erreurCourante == $errorCode ? '' : $erreurCourante);
+                $nbr++;
                 }
             }
-            $obj = $this->getCmd(null, 'errors');
-            if (is_object($obj)) {
-                $obj->event($erreurs);
             }
-            $obj = $this->getCmd(null, 'currentError');
-            if (is_object($obj)) {
-                $obj->event($erreurCourante);
-            }
+            $this->getCmd(null, 'errors')->event($erreurs);
+            $this->getCmd(null, 'currentError')->event($erreurCourante);
         }
 
         if ($outsideTemperature == 99) {
@@ -2083,16 +1407,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         }
 
         if (($activeProgram === 'comfort') || ($activeProgram === 'comfortHeating')) {
-            $this->getCmd(null, 'programTemperature')->event($comfortProgramTemperature);
+            $this->checkAndUpdateCmd('programTemperature', $comfortProgramTemperature);
             $consigneTemperature = $comfortProgramTemperature;
         } elseif (($activeProgram === 'normal') || ($activeProgram === 'normalHeating')) {
-            $this->getCmd(null, 'programTemperature')->event($normalProgramTemperature);
+            $this->checkAndUpdateCmd('programTemperature', $normalProgramTemperature);
             $consigneTemperature = $normalProgramTemperature;
         } elseif ($activeProgram === 'normalEnergySaving') {
-            $this->getCmd(null, 'programTemperature')->event($normalProgramTemperature);
+            $this->checkAndUpdateCmd('programTemperature', $normalProgramTemperature);
             $consigneTemperature = $normalProgramTemperature;
         } else {
-            $this->getCmd(null, 'programTemperature')->event($reducedProgramTemperature);
+            $this->checkAndUpdateCmd('programTemperature', $reducedProgramTemperature);
             $consigneTemperature = $reducedProgramTemperature;
         }
 
@@ -2104,14 +1428,14 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             $curve = '';
             for ($ot = 25; $ot >= -20; $ot -= 5) {
                 $deltaT = $ot - $consigneTemperature;
-                $tempDepart = $consigneTemperature + $shift - $slope * $deltaT * (1.4347 + 0.021 * $deltaT + 247.9 * 0.000001 * $deltaT * $deltaT);
+                $tempDepart = $consigneTemperature + $shift - $slope * $deltaT * (1.4347 + 0.021 * $deltaT + 247.9e-6 * $deltaT * $deltaT);
                 if ($curve == '') {
                     $curve = round($tempDepart, 0);
                 } else {
                     $curve = $curve . ',' . round($tempDepart, 0);
                 }
             }
-            $this->getCmd(null, 'curve')->event($curve);
+            $this->checkAndUpdateCmd('curve', $curve);
         }
 
         $now = time();
