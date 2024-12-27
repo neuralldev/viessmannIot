@@ -194,10 +194,8 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     public static function salsa()
     {
         foreach (viessmannIot::byType('viessmannIot', true) as $viessmannIot) {
-            log::add('viessmannIot', 'debug', "salsa called");
             if ($viessmannIot->getIsEnable() == 1) {
                 $tempsRestant = $viessmannIot->getCache('tempsRestant', 10);
-                log::add('viessmannIot', 'debug', "salsa timer " . $tempsRestant);
                 if ($tempsRestant > 0) {
                     $tempsRestant--;
                     if ($tempsRestant == 0) {
