@@ -825,11 +825,8 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     if (is_object($obj)) {
                         $obj->event($val);
                     }
-                } elseif (
-                    ($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM) ||
-                        $features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM_HEATING))
-
-                ) {
+                } elseif (($features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM) ||
+                        $features["data"][$i]["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM_HEATING))) {
                     $val = $features["data"][$i]["properties"]["temperature"]["value"];
                     $comfortProgramTemperature = $val;
                     $obj = $this->getCmd(null, 'comfortProgramTemperature');
@@ -2935,6 +2932,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     //
     public function toHtml($_version = 'dashboard')
     {
+        log::add('viessmannIot', 'debug', "toHtml called");
         $isWidgetPlugin = $this->getConfiguration('isWidgetPlugin');
         $displayWater = $this->getConfiguration('displayWater', '1');
         $displayGas = $this->getConfiguration('displayGas', '1');
@@ -2943,13 +2941,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $uniteGaz = $this->getConfiguration('uniteGaz', 'm3');
 
         if (!$isWidgetPlugin) {
+            log::add('viessmannIot', 'debug', "toHtml called, not widget plugin");
             return eqLogic::toHtml($_version);
         }
 
         $replace = $this->preToHtml($_version);
         if (!is_array($replace)) {
+            log::add('viessmannIot', 'debug', "toHtml called, preToHtml not array");
             return $replace;
-        }
+        };
+        log::add('viessmannIot', 'debug', "toHtml called, preToHtml array");
         $version = jeedom::versionAlias($_version);
 
         $obj = $this->getCmd(null, 'refresh');
