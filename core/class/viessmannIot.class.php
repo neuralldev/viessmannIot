@@ -2864,45 +2864,9 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $maintenant = time();
         $minute = date("i", $maintenant);
         if (($minute % 2) == 0) {
+            log::add('viessmannIot', 'debug', 'Cron toutes les 2 minutes');
             self::periodique();
         }
-    }
-
-    public static function cron5()
-    {
-        self::periodique();
-    }
-
-
-
-    // Fonction exécutée automatiquement avant la création de l'équipement
-    //
-    public function preInsert()
-    {
-    }
-
-    // Fonction exécutée automatiquement après la création de l'équipement
-    //
-    public function postInsert()
-    {
-    }
-
-    // Fonction exécutée automatiquement avant la mise à jour de l'équipement
-    //
-    public function preUpdate()
-    {
-    }
-
-    // Fonction exécutée automatiquement après la mise à jour de l'équipement
-    //
-    public function postUpdate()
-    {
-    }
-
-    // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
-    //
-    public function preSave()
-    {
     }
 
     // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
@@ -2938,7 +2902,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         ];
 
         foreach ($commands as $logicalId => $command) {
-            $obj = $this->getCmd(null, $logicalId);
+            $obj = $this->getCmd($command['type'], $logicalId);
             if (!is_object($obj)) {
                 $obj = new viessmannIotCmd();
                 $obj->setName($command['name']);
@@ -2951,26 +2915,15 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 if (isset($command['isHistorized'])) {
                     $obj->setIsHistorized($command['isHistorized']);
                 }
+                $obj->setEqLogic_id($this->getId());
+                $obj->setType($command['type']);
+                $obj->setSubType($command['subType']);
+                $obj->setLogicalId($logicalId);
+                $obj->save();
             }
-            $obj->setEqLogic_id($this->getId());
-            $obj->setType($command['type']);
-            $obj->setSubType($command['subType']);
-            $obj->setLogicalId($logicalId);
-            $obj->save();
         }
     }
 
-    // Fonction exécutée automatiquement avant la suppression de l'équipement
-    //
-    public function preRemove()
-    {
-    }
-
-    // Fonction exécutée automatiquement après la suppression de l'équipement
-    //
-    public function postRemove()
-    {
-    }
 
     // Permet de modifier l'affichage du widget (également utilisable par les commandes)
     //
@@ -3601,7 +3554,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             $replace["#idTotalGazConsumptionMonth#"] = "#idTotalGazConsumptionMonth#";
         }
 
-        $libMois = array("Janv", "Févr", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc");
+        $libMois = ["Janv", "Févr", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"];
 
         $maintenant = time();
         $mois = date("m", $maintenant) - 1;
@@ -3609,14 +3562,8 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $n = substr_count($str, ",") + 1;
 
         for ($i = 0; $i < $n; $i++) {
-            if ($moisS !== '') {
-                $moisS = ',' . $moisS;
-            }
-            $moisS = "'" . $libMois[$mois] . "'" . $moisS;
-            $mois--;
-            if ($mois < 0) {
-                $mois = 11;
-            }
+            $moisS = ($moisS !== '' ? ',' : '') . "'" . $libMois[$mois] . "'";
+            $mois = ($mois - 1 + 12) % 12;
         }
         $replace["#moisS#"] = $moisS;
 
@@ -4095,144 +4042,98 @@ class viessmannIotCmd extends cmd
     public function execute($_options = array())
     {
         $eqlogic = $this->getEqLogic();
-        if ($this->getLogicalId() == 'refresh') {
-            $viessmannApi = $eqlogic->getViessmann();
-            if ($viessmannApi !== null) {
-                $eqlogic->rafraichir($viessmannApi);
-                unset($viessmannApi);
-            }
-        } elseif ($this->getLogicalId() == 'startOneTimeDhwCharge') {
-            $eqlogic->startOneTimeDhwCharge();
-        } elseif ($this->getLogicalId() == 'stopOneTimeDhwCharge') {
-            $eqlogic->stopOneTimeDhwCharge();
-        } elseif ($this->getLogicalId() == 'activateComfortProgram') {
-            $eqlogic->activateComfortProgram();
-        } elseif ($this->getLogicalId() == 'deActivateComfortProgram') {
-            $eqlogic->deActivateComfortProgram();
-        } elseif ($this->getLogicalId() == 'activateEcoProgram') {
-            $eqlogic->activateEcoProgram();
-        } elseif ($this->getLogicalId() == 'deActivateEcoProgram') {
-            $eqlogic->deActivateEcoProgram();
-        } elseif ($this->getLogicalId() == 'activateLastSchedule') {
-            $eqlogic->activateLastSchedule();
-        } elseif ($this->getLogicalId() == 'deActivateLastSchedule') {
-            $eqlogic->deActivateLastSchedule();
-        } elseif ($this->getLogicalId() == 'modeStandby') {
-            $eqlogic->setMode('standby');
-        } elseif ($this->getLogicalId() == 'modeHeating') {
-            $eqlogic->setMode('heating');
-        } elseif ($this->getLogicalId() == 'modeCooling') {
-            $eqlogic->setMode('cooling');
-        } elseif ($this->getLogicalId() == 'modeHeatingCooling') {
-            $eqlogic->setMode('heatingCooling');
-        } elseif ($this->getLogicalId() == 'modeTestMode') {
-            $eqlogic->setMode('testMode');
-        } elseif ($this->getLogicalId() == 'modeDhw') {
-            $eqlogic->setMode('dhw');
-        } elseif ($this->getLogicalId() == 'modeDhwAndHeating') {
-            $eqlogic->setMode('dhwAndHeating');
-        } elseif ($this->getLogicalId() == 'modeDhwBalanced') {
-            $eqlogic->setDhwMode('balanced');
-        } elseif ($this->getLogicalId() == 'modeDhwComfort') {
-            $eqlogic->setDhwMode('comfort');
-        } elseif ($this->getLogicalId() == 'modeDhwEco') {
-            $eqlogic->setDhwMode('eco');
-        } elseif ($this->getLogicalId() == 'modeDhwOff') {
-            $eqlogic->setDhwMode('off');
-        } elseif ($this->getLogicalId() == 'modeHeatingCooling') {
-            $eqlogic->setMode('heatingCooling');
-        } elseif ($this->getLogicalId() == 'scheduleHolidayProgram') {
-            $eqlogic->scheduleHolidayProgram();
-        } elseif ($this->getLogicalId() == 'unscheduleHolidayProgram') {
-            $eqlogic->unscheduleHolidayProgram();
-        } elseif ($this->getLogicalId() == 'scheduleHolidayAtHomeProgram') {
-            $eqlogic->scheduleHolidayAtHomeProgram();
-        } elseif ($this->getLogicalId() == 'unscheduleHolidayAtHomeProgram') {
-            $eqlogic->unscheduleHolidayAtHomeProgram();
-        } elseif ($this->getLogicalId() == 'dhwSlider') {
-            if (!isset($_options['slider']) || $_options['slider'] == '' || !is_numeric(intval($_options['slider']))) {
-                return;
-            }
-            $eqlogic->getCmd(null, 'dhwTemperature')->event($_options['slider']);
-            $eqlogic->setDhwTemperature($_options['slider']);
-        } elseif ($this->getLogicalId() == 'comfortProgramSlider') {
-            if (!isset($_options['slider']) || $_options['slider'] == '' || !is_numeric(intval($_options['slider']))) {
-                return;
-            }
-            $eqlogic->getCmd(null, 'comfortProgramTemperature')->event($_options['slider']);
-            $eqlogic->setComfortProgramTemperature($_options['slider']);
-        } elseif ($this->getLogicalId() == 'normalProgramSlider') {
-            if (!isset($_options['slider']) || $_options['slider'] == '' || !is_numeric(intval($_options['slider']))) {
-                return;
-            }
-            $eqlogic->getCmd(null, 'normalProgramTemperature')->event($_options['slider']);
-            $eqlogic->setNormalProgramTemperature($_options['slider']);
-        } elseif ($this->getLogicalId() == 'reducedProgramSlider') {
-            if (!isset($_options['slider']) || $_options['slider'] == '' || !is_numeric(intval($_options['slider']))) {
-                return;
-            }
-            $eqlogic->getCmd(null, 'reducedProgramTemperature')->event($_options['slider']);
-            $eqlogic->setReducedProgramTemperature($_options['slider']);
-        } elseif ($this->getLogicalId() == 'shiftSlider') {
-            if (!isset($_options['slider']) || $_options['slider'] == '' || !is_numeric(intval($_options['slider']))) {
-                return;
-            }
-            $eqlogic->getCmd(null, 'shift')->event($_options['slider']);
-            $eqlogic->setShift($_options['slider']);
-        } elseif ($this->getLogicalId() == 'slopeSlider') {
-            if (!isset($_options['slider']) || $_options['slider'] == '' || !is_numeric(intval($_options['slider']))) {
-                return;
-            }
-            $eqlogic->getCmd(null, 'slope')->event($_options['slider']);
-            $eqlogic->setSlope($_options['slider']);
-        } elseif ($this->getLogicalId() == 'startHolidayText') {
-            if (!isset($_options['text']) || $_options['text'] == '') {
-                return;
-            }
-            $eqlogic->getCmd(null, 'startHoliday')->event($_options['text']);
-        } elseif ($this->getLogicalId() == 'endHolidayText') {
-            if (!isset($_options['text']) || $_options['text'] == '') {
-                return;
-            }
-            $eqlogic->getCmd(null, 'endHoliday')->event($_options['text']);
-        } elseif ($this->getLogicalId() == 'startHolidayAtHomeText') {
-            if (!isset($_options['text']) || $_options['text'] == '') {
-                return;
-            }
-            $eqlogic->getCmd(null, 'startHolidayAtHome')->event($_options['text']);
-        } elseif ($this->getLogicalId() == 'endHolidayAtHomeText') {
-            if (!isset($_options['text']) || $_options['text'] == '') {
-                return;
-            }
-            $eqlogic->getCmd(null, 'endHolidayAtHome')->event($_options['text']);
-        } elseif ($this->getLogicalId() == 'setHeatingSchedule') {
-            if ($this->getSubType() === 'message') {
-                if ($_options !== null) {
-                    $titre = '';
-                    if (isset($_options['title'])) {
-                        $titre = $_options['title'];
-                    }
-                    $message = '';
-                    if (isset($_options['message'])) {
-                        $message = $_options['message'];
-                    }
-                    $str = $eqlogic->setHeatingSchedule($titre, $message);
+        $logicalId = $this->getLogicalId();
+
+        switch ($logicalId) {
+            case 'refresh':
+                $viessmannApi = $eqlogic->getViessmann();
+                if ($viessmannApi !== null) {
+                    $eqlogic->rafraichir($viessmannApi);
+                    unset($viessmannApi);
                 }
-            }
-        } elseif ($this->getLogicalId() == 'setDhwSchedule') {
-            if ($this->getSubType() === 'message') {
-                if ($_options !== null) {
-                    $titre = '';
-                    if (isset($_options['title'])) {
-                        $titre = $_options['title'];
-                    }
-                    $message = '';
-                    if (isset($_options['message'])) {
-                        $message = $_options['message'];
-                    }
-                    $str = $eqlogic->setDhwSchedule($titre, $message);
+                break;
+            case 'startOneTimeDhwCharge':
+                $eqlogic->startOneTimeDhwCharge();
+                break;
+            case 'stopOneTimeDhwCharge':
+                $eqlogic->stopOneTimeDhwCharge();
+                break;
+            case 'activateComfortProgram':
+                $eqlogic->activateComfortProgram();
+                break;
+            case 'deActivateComfortProgram':
+                $eqlogic->deActivateComfortProgram();
+                break;
+            case 'activateEcoProgram':
+                $eqlogic->activateEcoProgram();
+                break;
+            case 'deActivateEcoProgram':
+                $eqlogic->deActivateEcoProgram();
+                break;
+            case 'activateLastSchedule':
+                $eqlogic->activateLastSchedule();
+                break;
+            case 'deActivateLastSchedule':
+                $eqlogic->deActivateLastSchedule();
+                break;
+            case 'modeStandby':
+            case 'modeHeating':
+            case 'modeCooling':
+            case 'modeHeatingCooling':
+            case 'modeTestMode':
+            case 'modeDhw':
+            case 'modeDhwAndHeating':
+                $eqlogic->setMode(str_replace('mode', '', $logicalId));
+                break;
+            case 'modeDhwBalanced':
+            case 'modeDhwComfort':
+            case 'modeDhwEco':
+            case 'modeDhwOff':
+                $eqlogic->setDhwMode(str_replace('modeDhw', '', $logicalId));
+                break;
+            case 'scheduleHolidayProgram':
+                $eqlogic->scheduleHolidayProgram();
+                break;
+            case 'unscheduleHolidayProgram':
+                $eqlogic->unscheduleHolidayProgram();
+                break;
+            case 'scheduleHolidayAtHomeProgram':
+                $eqlogic->scheduleHolidayAtHomeProgram();
+                break;
+            case 'unscheduleHolidayAtHomeProgram':
+                $eqlogic->unscheduleHolidayAtHomeProgram();
+                break;
+            case 'dhwSlider':
+            case 'comfortProgramSlider':
+            case 'normalProgramSlider':
+            case 'reducedProgramSlider':
+            case 'shiftSlider':
+            case 'slopeSlider':
+                if (isset($_options['slider']) && is_numeric($_options['slider'])) {
+                    $cmd = str_replace('Slider', 'Temperature', $logicalId);
+                    $eqlogic->getCmd(null, $cmd)->event($_options['slider']);
+                    $method = 'set' . ucfirst($cmd);
+                    $eqlogic->$method($_options['slider']);
                 }
-            }
+                break;
+            case 'startHolidayText':
+            case 'endHolidayText':
+            case 'startHolidayAtHomeText':
+            case 'endHolidayAtHomeText':
+                if (isset($_options['text']) && $_options['text'] !== '') {
+                    $cmd = str_replace('Text', '', $logicalId);
+                    $eqlogic->getCmd(null, $cmd)->event($_options['text']);
+                }
+                break;
+            case 'setHeatingSchedule':
+            case 'setDhwSchedule':
+                if ($this->getSubType() === 'message' && $_options !== null) {
+                    $titre = $_options['title'] ?? '';
+                    $message = $_options['message'] ?? '';
+                    $method = str_replace('set', 'set', $logicalId);
+                    $eqlogic->$method($titre, $message);
+                }
+                break;
         }
     }
 }

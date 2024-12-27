@@ -69,93 +69,22 @@ class ViessmannApi
 
         // Contrôle des paramètres et mémorisation dans la classe
         //
-        if (!array_key_exists('clientId', $params)) {
-            throw new ViessmannApiException('Id client obligatoire', 2);
-            return;
-        }
-        if (empty($params['clientId'])) {
-            throw new ViessmannApiException('Id client obligatoire', 2);
-            return;
-        }
-        $this->clientId = $params['clientId'];
-
-        if (!array_key_exists('codeChallenge', $params)) {
-            throw new ViessmannApiException('Code challenge obligatoire', 2);
-            return;
-        }
-        if (empty($params['codeChallenge'])) {
-            throw new ViessmannApiException('Code challenge obligatoire', 2);
-            return;
-        }
-        $this->codeChallenge = $params['codeChallenge'];
-            
-        if (!array_key_exists('user', $params)) {
-            throw new ViessmannApiException('Nom utilisateur obligatoire', 2);
-            return;
-        }
-        if (empty($params['user'])) {
-            throw new ViessmannApiException('Nom utilisateur obligatoire', 2);
-            return;
-        }
-        $this->user = $params['user'];
-
-        if (!array_key_exists('pwd', $params)) {
-            throw new ViessmannApiException('Mot de passe obligatoire', 2);
-            return;
-        }
-        if (empty($params['pwd'])) {
-            throw new ViessmannApiException('Mot de passe obligatoire', 2);
-            return;
-        }
-        $this->pwd = $params['pwd'];
-
-        if (!array_key_exists('installationId', $params)) {
-            $this->installationId = '';
-        } else {
-            $this->installationId = trim($params['installationId']);
+        $requiredParams = ['clientId', 'codeChallenge', 'user', 'pwd'];
+        foreach ($requiredParams as $param) {
+            if (!array_key_exists($param, $params) || empty($params[$param])) {
+            throw new ViessmannApiException(ucfirst($param) . ' obligatoire', 2);
+            }
+            $this->$param = $params[$param];
         }
 
-        if (!array_key_exists('serial', $params)) {
-            $this->serial = '';
-        } else {
-            $this->serial = trim($params['serial']);
-        }
-
-        if (!array_key_exists('deviceId', $params)) {
-            $this->deviceId = 0;
-        } else {
-            $this->deviceId = trim($params['deviceId']);
-        }
-
-        if (!array_key_exists('circuitId', $params)) {
-            $this->circuitId = 0;
-        } else {
-            $this->circuitId = trim($params['circuitId']);
-        }
-
-        if (!array_key_exists('access_token', $params)) {
-            $this->accessToken = '';
-        } else {
-            $this->accessToken = trim($params['access_token']);
-        }
-
-        if (!array_key_exists('refresh_token', $params)) {
-            $this->refreshToken = '';
-        } else {
-            $this->refreshToken = trim($params['refresh_token']);
-        }
-
-        if (!array_key_exists('expires_at', $params)) {
-            $this->expires_at = 0;
-        } else {
-            $this->expires_at = intval($params['expires_at']);
-        }
-
-        if (!array_key_exists('logFeatures', $params)) {
-            $this->logFeatures = '';
-        } else {
-            $this->logFeatures = $params['logFeatures'];
-        }
+        $this->installationId = array_key_exists('installationId', $params) ? trim($params['installationId']) : '';
+        $this->serial = array_key_exists('serial', $params) ? trim($params['serial']) : '';
+        $this->deviceId = array_key_exists('deviceId', $params) ? trim($params['deviceId']) : 0;
+        $this->circuitId = array_key_exists('circuitId', $params) ? trim($params['circuitId']) : 0;
+        $this->accessToken = array_key_exists('access_token', $params) ? trim($params['access_token']) : '';
+        $this->refreshToken = array_key_exists('refresh_token', $params) ? trim($params['refresh_token']) : '';
+        $this->expires_at = array_key_exists('expires_at', $params) ? intval($params['expires_at']) : 0;
+        $this->logFeatures = array_key_exists('logFeatures', $params) ? $params['logFeatures'] : '';
             
         $this->identity = array();
         $this->gateway = array();
@@ -170,16 +99,13 @@ class ViessmannApi
             return;
         }
 
-        $return = $this->refreshToken();
-        if ($return == false) {
-            $code = $this->getCode();
-            if ($code == false) {
-                throw new ViessmannApiException("Erreur acquisition code sur le serveur Viessmann", 2);
+        if (!$this->refreshToken()) {
+            if (!($code = $this->getCode())) {
+            throw new ViessmannApiException("Erreur acquisition code sur le serveur Viessmann", 2);
             }
         
-            $return = $this->getToken($code);
-            if ($return == false) {
-                throw new ViessmannApiException("Erreur acquisition token sur le serveur Viessmann", 2);
+            if (!$this->getToken($code)) {
+            throw new ViessmannApiException("Erreur acquisition token sur le serveur Viessmann", 2);
             }
         }   
 
@@ -223,10 +149,8 @@ class ViessmannApi
 
         // Extraction Code
         //
-        $matches = array();
-        $pattern = '/code=(.*)"/';
-        if (preg_match_all($pattern, $response, $matches)) {
-            return $matches[1][0];
+        if (preg_match('/code=([^&"]+)/', $response, $matches)) {
+            return $matches[1];
         } else {
             return false;
         }
@@ -237,48 +161,39 @@ class ViessmannApi
     private function getToken($code)
     {
         // Paramètres Token
-        //
         $url = self::TOKEN_URL . "?grant_type=authorization_code&code_verifier=" . $this->codeChallenge . "&client_id=" .
         $this->clientId . "&redirect_uri=" . self::CALLBACK_URI . "&code=" . $code;
         
-        $header = array("Content-Type: application/x-www-form-urlencoded");
+        $header = ["Content-Type: application/x-www-form-urlencoded"];
 
-        $curloptions = array(
+        $curloptions = [
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_POST => true,
-        );
+        ];
 
         // Appel Curl Token
-        //
         $curl = curl_init();
         curl_setopt_array($curl, $curloptions);
         $response = curl_exec($curl);
         curl_close($curl);
 
         // Extraction Token
-        //
         $json = json_decode($response, true);
-        if (array_key_exists('error', $json)) {
+        if (isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
             return false;
         }
 
-        if (!array_key_exists('access_token', $json) || !array_key_exists('expires_in', $json)) {
-            return false;
-        }
         $this->accessToken = $json['access_token'];
-
-        if (array_key_exists('refresh_token', $json)) {
-            $this->refreshToken = $json['refresh_token'];
-        } else {
-            $this->refreshToken = '';
-            log::add('viessmannIot', 'debug', 'No Refresh token ');
-        }
-
+        $this->refreshToken = $json['refresh_token'] ?? '';
         $this->expires_in = $json['expires_in'];
+
+        if (empty($this->refreshToken)) {
+            log::add('viessmannIot', 'debug', 'No Refresh token');
+        }
 
         return true;
     }
@@ -287,55 +202,43 @@ class ViessmannApi
     //
     private function refreshToken()
     {
-        if ( $this->refreshToken == '' ) {
+        if (empty($this->refreshToken)) {
             return false;
         }
 
         // Paramètres Token
-        //
-        $url = self::TOKEN_URL . "?grant_type=refresh_token&refresh_token=" . $this->refreshToken . "&client_id=" .
-        $this->clientId;
-        
-        $header = array("Content-Type: application/x-www-form-urlencoded");
+        $url = self::TOKEN_URL . "?grant_type=refresh_token&refresh_token=" . $this->refreshToken . "&client_id=" . $this->clientId;
+        $header = ["Content-Type: application/x-www-form-urlencoded"];
 
-        $curloptions = array(
+        $curloptions = [
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_POST => true,
-        );
+        ];
 
         // Appel Curl Token
-        //
         $curl = curl_init();
         curl_setopt_array($curl, $curloptions);
         $response = curl_exec($curl);
         curl_close($curl);
 
         // Extraction Token
-        //
         $json = json_decode($response, true);
-        if (array_key_exists('error', $json)) {
+        if (isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
             log::add('viessmannIot', 'debug', 'Refresh token error');
             return false;
         }
 
-        if (!array_key_exists('access_token', $json) || !array_key_exists('expires_in', $json)) {
-            log::add('viessmannIot', 'debug', 'Refresh token data error');
-            return false;
-        }
         $this->accessToken = $json['access_token'];
-
-        if (array_key_exists('refresh_token', $json)) {
-            $this->refreshToken = $json['refresh_token'];
-        } else {
-            $this->refreshToken = '';
-            log::add('viessmannIot', 'debug', 'No Refresh token ');
-        }
-
+        $this->refreshToken = $json['refresh_token'] ?? '';
         $this->expires_in = $json['expires_in'];
+
+        if (empty($this->refreshToken)) {
+            log::add('viessmannIot', 'debug', 'No Refresh token');
+        }
 
         return true;
     }
@@ -422,20 +325,18 @@ class ViessmannApi
     public function getFeatures()
     {
         // Lire les données features
-        //
         $url = self::FEATURES_URL . "/installations/" . $this->installationId . "/gateways/" . $this->serial . "/devices/" . $this->deviceId . "/features";
-        $header = array("Authorization: Bearer " . $this->accessToken);
+        $header = ["Authorization: Bearer " . $this->accessToken];
 
-        $curloptions = array(
+        $curloptions = [
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-        );
+        ];
 
         // Appel Curl Données
-        //
         $curl = curl_init();
         curl_setopt_array($curl, $curloptions);
         $response = curl_exec($curl);
@@ -443,33 +344,26 @@ class ViessmannApi
 
         $this->features = json_decode($response, true);
 
-        if ($this->logFeatures == 'Oui') {
+        if ($this->logFeatures === 'Oui') {
             $json_file = __DIR__ . '/../../data/features.json';
-            $response = str_replace($this->installationId, 'XXXXXX', $response);
-            $response = str_replace($this->serial, 'XXXXXXXXXXXXXXXX', $response);
+            $response = str_replace([$this->installationId, $this->serial], ['XXXXXX', 'XXXXXXXXXXXXXXXX'], $response);
             file_put_contents($json_file, $response);
         }
-        
-        if (array_key_exists('statusCode', $this->features)) {
+
+        if (isset($this->features['statusCode'])) {
             $json_file = __DIR__ . '/../../data/erreur.json';
-            $response = str_replace($this->installationId, 'XXXXXX', $response);
-            $response = str_replace($this->serial, 'XXXXXXXXXXXXXXXX', $response);
+            $response = str_replace([$this->installationId, $this->serial], ['XXXXXX', 'XXXXXXXXXXXXXXXX'], $response);
             file_put_contents($json_file, $response);
 
             $message = $this->features["message"];
-            if (array_key_exists('extendedPayload', $this->features)) {
-                $array = $this->features["extendedPayload"];
-                if (array_key_exists('details', $array)) {
-                    $message .= ' ( ' . $array['details'] . ' ) ';
-                }
+            if (isset($this->features['extendedPayload']['details'])) {
+                $message .= ' ( ' . $this->features['extendedPayload']['details'] . ' ) ';
             }
 
             return $message;
-
         }
 
         return true;
-
     }
 
     // Lire log features
