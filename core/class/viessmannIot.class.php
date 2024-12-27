@@ -209,7 +209,8 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                         }
                     }
                     $viessmannIot->setCache('tempsRestant', $tempsRestant);
-                }
+                } else
+                    $viessmannIot->setCache('tempsRestant', 10);
             }
         }
         sleep(1);
