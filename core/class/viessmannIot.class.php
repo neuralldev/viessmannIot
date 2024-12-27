@@ -223,7 +223,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     }
 
     // Supprimer les commandes
-    //
+  /*  
     public function deleteAllCommands()
     {
         $cmds = $this->getCmd();
@@ -233,6 +233,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             }
         }
     }
+*/
 
     // Créer les commandes
     //
@@ -2929,6 +2930,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 $obj->setSubType($command['subType']);
                 $obj->setLogicalId($logicalId);
                 $obj->save();
+            }
+            else
+            {
+                log::add(  'viessmannIot', 'debug', "postSave called, command $logicalId already exists");
             }
         }
     }
