@@ -2240,6 +2240,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
     public static function periodique()
     {
+        log::add('viessmannIot', 'debug', 'Rafraichissement périodique');
         $oldUserName = '';
         $oldPassword = '';
 
@@ -2249,6 +2250,9 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             if ($viessmann->getIsEnable() == 1) {
                 $userName = trim($viessmann->getConfiguration('userName', ''));
                 $password = trim($viessmann->getConfiguration('password', ''));
+                if ($userName == '' || $password == '') {
+                    return;
+                }
                 if ($first == false) {
                     if (($userName != $oldUserName) || ($password != $oldPassword)) {
                         $tousPareils = false;
