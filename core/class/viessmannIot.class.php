@@ -1600,10 +1600,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"temperature\": $temperature}";
         $viessmannApi->setFeature(self::DHW_TEMPERATURE, "setTargetTemperature", $data);
@@ -1619,10 +1616,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"mode\":\"" . $mode . "\"}";
         $viessmannApi->setFeature($this->buildFeature($circuitId, self::ACTIVE_MODE), "setMode", $data);
@@ -1637,10 +1631,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"mode\":\"" . $mode . "\"}";
         $viessmannApi->setFeature(self::ACTIVE_DHW_MODE, "setMode", $data);
@@ -1655,13 +1646,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $circuitId = trim($this->getConfiguration('circuitId', '0'));
+//        $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $program = $this->getConfiguration('comfortProgram', '');
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"targetTemperature\": $temperature}";
         $viessmannApi->setFeature($program, "setTemperature", $data);
@@ -1684,13 +1672,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $circuitId = trim($this->getConfiguration('circuitId', '0'));
+//        $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $program = $this->getConfiguration('normalProgram', '');
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"targetTemperature\": $temperature}";
         $viessmannApi->setFeature($program, "setTemperature", $data);
@@ -1713,13 +1698,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $circuitId = trim($this->getConfiguration('circuitId', '0'));
+ //       $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $program = $this->getConfiguration('reducedProgram', '');
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"targetTemperature\": $temperature}";
         $viessmannApi->setFeature($program, "setTemperature", $data);
@@ -1741,10 +1723,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature(self::HEATING_DHW_ONETIMECHARGE, "activate", $data);
@@ -1759,10 +1738,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature(self::HEATING_DHW_ONETIMECHARGE, "deactivate", $data);
@@ -1777,13 +1753,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $circuitId = trim($this->getConfiguration('circuitId', '0'));
+  //      $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $program = $this->getConfiguration('comfortProgram', '');
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature($program, "activate", $data);
@@ -1798,13 +1771,10 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $circuitId = trim($this->getConfiguration('circuitId', '0'));
+   //     $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $program = $this->getConfiguration('comfortProgram', '');
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature($program, "deactivate", $data);
@@ -1821,10 +1791,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature($this->buildFeature($circuitId, self::ECO_PROGRAM), "activate", $data);
@@ -1841,10 +1808,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature($this->buildFeature($circuitId, self::ECO_PROGRAM), "deactivate", $data);
@@ -1861,10 +1825,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature($this->buildFeature($circuitId, self::FORCED_LAST_FROM_SCHEDULE), "activate", $data);
@@ -1881,10 +1842,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature($this->buildFeature($circuitId, self::FORCED_LAST_FROM_SCHEDULE), "deactivate", $data);
@@ -1901,10 +1859,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $obj = $this->getCmd(null, 'shift');
         $shift = $obj->execCmd();
@@ -1923,10 +1878,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $obj = $this->getCmd(null, 'slope');
         $slope = $obj->execCmd();
@@ -1959,10 +1911,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             throw new Exception(__('Date de début postérieure à la date de fin', __FILE__));
         }
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"start\":\"" . $startHoliday . "\",\"end\":\"" . $endHoliday . "\"}";
         $viessmannApi->setFeature(self::HOLIDAY_PROGRAM, "schedule", $data);
@@ -1977,10 +1926,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature(self::HOLIDAY_PROGRAM, "unschedule", $data);
@@ -2011,10 +1957,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             throw new Exception(__('Date de début postérieure à la date de fin', __FILE__));
         }
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{\"start\":\"" . $startHolidayAtHome . "\",\"end\":\"" . $endHolidayAtHome . "\"}";
         $viessmannApi->setFeature(self::HOLIDAY_AT_HOME_PROGRAM, "schedule", $data);
@@ -2029,10 +1972,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
     {
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $data = "{}";
         $viessmannApi->setFeature(self::HOLIDAY_AT_HOME_PROGRAM, "unschedule", $data);
@@ -2083,10 +2023,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
-            return;
-        }
+        if (($viessmannApi = $this->getViessmann()) === null) return;
 
         $viessmannApi->setFeature($this->buildFeature($circuitId, self::HEATING_SCHEDULE), "setSchedule", $commande);
         unset($viessmannApi);
@@ -2135,8 +2072,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $circuitId = trim($this->getConfiguration('circuitId', '0'));
         $this->setCache('tempsRestant', self::REFRESH_TIME);
 
-        $viessmannApi = $this->getViessmann();
-        if ($viessmannApi == null) {
+        if (($viessmannApi = $this->getViessmann()) === null) {
             return;
         }
 

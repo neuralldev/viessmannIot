@@ -119,7 +119,14 @@ class ViessmannApi
         }
     }
 
-    // Fonction pour effectuer les appels cURL
+    /**
+     * Summary of makeCurlRequest
+     * @param mixed $url
+     * @param mixed $header
+     * @param bool $post
+     * @param mixed $postFields
+     * @return bool|string
+     */
     private function makeCurlRequest($url, $header, $post = false, $postFields = null)
     {
         $curloptions = [
@@ -145,21 +152,24 @@ class ViessmannApi
         return $response;
     }
 
-    // Lire le code d'accès au serveur Viessmann
+    /**
+     * Summary of getCode
+     * @return mixed
+     */
     private function getCode()
     {
         $url = self::AUTHORIZE_URL . "?client_id=" . $this->clientId . "&code_challenge=" . $this->codeChallenge . "&scope=IoT%20User%20offline_access&redirect_uri=" . self::CALLBACK_URI . "&response_type=code";
         $header = ["Content-Type: application/x-www-form-urlencoded"];
         $response = $this->makeCurlRequest($url, $header, true);
 
-        if (preg_match('/code=([^&"]+)/', $response, $matches)) {
-            return $matches[1];
-        } else {
-            return false;
-        }
+        return preg_match('/code=([^&"]+)/', $response, $matches) ? $matches[1] : false;
     }
 
-    // Lire le token d'accès au serveur Viessmann
+    /**
+     * Summary of getToken
+     * @param mixed $code
+     * @return bool
+     */
     private function getToken($code)
     {
         $url = self::TOKEN_URL . "?grant_type=authorization_code&code_verifier=" . $this->codeChallenge . "&client_id=" . $this->clientId . "&redirect_uri=" . self::CALLBACK_URI . "&code=" . $code;
@@ -175,9 +185,8 @@ class ViessmannApi
         $this->refreshToken = $json['refresh_token'] ?? '';
         $this->expires_in = $json['expires_in'];
 
-        if (empty($this->refreshToken)) {
+        if (empty($this->refreshToken)) 
             log::add('viessmannIot', 'debug', 'No Refresh token');
-        }
 
         return true;
     }
@@ -378,5 +387,10 @@ class ViessmannApi
     public function getArrayEvents()
     {
         return $this->events;
+    }
+
+    public function getLogFeatures()
+    {
+        return $this->logFeatures;
     }
 }
