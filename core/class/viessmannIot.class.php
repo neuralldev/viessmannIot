@@ -702,6 +702,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $features = $viessmannApi->getArrayFeatures();
         $nbrFeatures = count($features["data"]);
         for ($i = 0; $i < $nbrFeatures; $i++) {
+            log::add('viessmannIot', 'debug', 'feature  '.$i);
             if ($features["data"][$i]["isEnabled"] == true) {
                 log::add('viessmannIot', 'debug', 'feature  '.$features["data"][$i]["feature"]);
                 if ($features["data"][$i]["feature"] == self::OUTSIDE_TEMPERATURE) {
@@ -1335,17 +1336,17 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
             foreach (['Total', 'Dhw', 'Heating'] as $type) {
             $c = $this->getCmd(null, "total{$type}Consumption");
-            if (!is_null($gasSummary["day{$type}"])) $c->event($gasSummary["day{$type}"]);
+            if (is_object($c)) $c->event($gasSummary["day{$type}"]);
             $c = $this->getCmd(null, "totalPowerConsumption");
-            if (!is_null($powerSummary["day{$type}"])) $c->event($powerSummary["day{$type}"]);
+            if (is_object($c)) $c->event($powerSummary["day{$type}"]);
             }
 
             foreach (['day', 'week', 'month', 'year'] as $period) {
             foreach (['Dhw', 'Heating', 'Total'] as $type) {
                 $c=$this->getCmd(null, "{$type}GazConsumption{$period}");
-                if (!is_null($gasSummary["{$period}{$type}"])) $c->event($gasSummary["{$period}{$type}"]);
+                if (is_object($c)) $c->event($gasSummary["{$period}{$type}"]);
                 $c=$this->getCmd(null, "{$type}PowerConsumption{$period}");
-                if (!is_null($powerSummary["{$period}{$type}"])) $c->event($powerSummary["{$period}{$type}"]);
+                if (is_object($c)) $c->event($powerSummary["{$period}{$type}"]);
             }
             }
         }
