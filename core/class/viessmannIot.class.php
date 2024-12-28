@@ -702,8 +702,9 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $features = $viessmannApi->getArrayFeatures();
         $nbrFeatures = count($features["data"]);
         for ($i = 0; $i < $nbrFeatures; $i++) {
+            log::add('viessmannIot', 'debug', 'feature  '.$i);
             if ($features["data"][$i]["isEnabled"] == true) {
-
+                log::add('viessmannIot', 'debug', 'feature  '.$features["data"][$i]["feature"];
                 if ($features["data"][$i]["feature"] == self::OUTSIDE_TEMPERATURE) {
                     $val = $features["data"][$i]["properties"]["value"]["value"];
                     $outsideTemperature = $val;
