@@ -1335,17 +1335,17 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
             foreach (['Total', 'Dhw', 'Heating'] as $type) {
             $c = $this->getCmd(null, "total{$type}Consumption");
-            if (!is_null($c)) $c->event($gasSummary["day{$type}"]);
+            if (!is_null($gasSummary["day{$type}"])) $c->event($gasSummary["day{$type}"]);
             $c = $this->getCmd(null, "totalPowerConsumption");
-            if (!is_null($c)) $c->event($powerSummary["day{$type}"]);
+            if (!is_null($powerSummary["day{$type}"])) $c->event($powerSummary["day{$type}"]);
             }
 
             foreach (['day', 'week', 'month', 'year'] as $period) {
             foreach (['Dhw', 'Heating', 'Total'] as $type) {
                 $c=$this->getCmd(null, "{$type}GazConsumption{$period}");
-                if (!is_null($c)) $c->event($gasSummary["{$period}{$type}"]);
+                if (!is_null($gasSummary["{$period}{$type}"])) $c->event($gasSummary["{$period}{$type}"]);
                 $c=$this->getCmd(null, "{$type}PowerConsumption{$period}");
-                if (!is_null($c)) $c->event($powerSummary["{$period}{$type}"]);
+                if (!is_null($powerSummary["{$period}{$type}"])) $c->event($powerSummary["{$period}{$type}"]);
             }
             }
         }
