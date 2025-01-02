@@ -160,7 +160,7 @@ class ViessmannApi
         $url = self::AUTHORIZE_URL . "?client_id=" . $this->clientId . "&code_challenge=" . $this->codeChallenge . "&scope=IoT%20User%20offline_access&redirect_uri=" . self::CALLBACK_URI . "&response_type=code";
         $header = ["Content-Type: application/x-www-form-urlencoded"];
         $response = $this->makeCurlRequest($url, $header, true);
-
+        log::add('viessmannIot', 'debug', 'getCode response : ' . $response);
         return preg_match('/code=([^&"]+)/', $response, $matches) ? $matches[1] : false;
     }
 
