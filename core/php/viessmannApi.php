@@ -66,7 +66,6 @@ class ViessmannApi
     //
     public function __construct($params)
     {
-
         // Contrôle des paramètres et mémorisation dans la classe
         //
         $requiredParams = ['clientId', 'codeChallenge', 'user', 'pwd'];
@@ -203,7 +202,7 @@ class ViessmannApi
         $response = $this->makeCurlRequest($url, $header, true);
 
         $json = json_decode($response, true);
-        if (isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
+        if (!is_object($json) || isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
             log::add('viessmannIot', 'debug', 'Refresh token error');
             return false;
         }
@@ -237,22 +236,29 @@ class ViessmannApi
     // Lire les données du gateway
     public function getGateway()
     {
+
+        log::add('viessmannIot', 'debug', 'getGateway start');
         $url = self::GATEWAY_URL;
         $header = ["Authorization: Bearer " . $this->accessToken];
         $response = $this->makeCurlRequest($url, $header);
 
         $this->gateway = json_decode($response, true);
-        $json_file = __DIR__ . '/../../data/gateway.json';
-        $response = str_replace($this->installationId, 'XXXXXX', $response);
-        $response = str_replace($this->serial, 'XXXXXXXXXXXXXXXX', $response);
-        file_put_contents($json_file, $response);
 
-        if (array_key_exists('statusCode', $this->gateway)) {
-            $json_file = __DIR__ . '/../../data/erreur.json';
+        if ($this->logFeatures === 'Oui') {
+            $json_file = __DIR__ . '/../../data/gateway.json';
             $response = str_replace($this->installationId, 'XXXXXX', $response);
             $response = str_replace($this->serial, 'XXXXXXXXXXXXXXXX', $response);
             file_put_contents($json_file, $response);
+        }
 
+        if (array_key_exists('statusCode', $this->gateway)) {
+
+            if ($this->logFeatures === 'Oui') {
+                $json_file = __DIR__ . '/../../data/erreur.json';
+                $response = str_replace($this->installationId, 'XXXXXX', $response);
+                $response = str_replace($this->serial, 'XXXXXXXXXXXXXXXX', $response);
+                file_put_contents($json_file, $response);
+            }
             return $this->gateway["message"];
         }
 
@@ -262,7 +268,8 @@ class ViessmannApi
     // Lire les features
     public function getFeatures()
     {
-        $url = self::FEATURES_URL . "/installations/" . $this->installationId . "/gateways/" . $this->serial . "/devices/" . $this->deviceId . "/features";
+        log::add('viessmannIot', 'debug', 'getFeatures start');
+        $url = self::FEATURES_URL . "/installations/" . $this->installationId . "/gateways/" . $this->serial . "/devices/" . $this->deviceId . "/features?skipDisabled";
         $header = ["Authorization: Bearer " . $this->accessToken];
         $response = $this->makeCurlRequest($url, $header);
 
@@ -293,6 +300,7 @@ class ViessmannApi
     // Lire les events
     public function getEvents()
     {
+        log::add('viessmannIot', 'debug', 'getEvents start');
         $url = self::EVENTS_URL_1 . $this->installationId . self::EVENTS_URL_2 . "?gatewaySerial=" . $this->serial . "&limit=1000";
         $header = ["Authorization: Bearer " . $this->accessToken];
         $response = $this->makeCurlRequest($url, $header);
