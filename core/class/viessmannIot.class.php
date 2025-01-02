@@ -88,7 +88,6 @@ class viessmannIot extends eqLogic
     public const FORCED_LAST_FROM_SCHEDULE = "operating.programs.forcedLastFromSchedule";
     public const SOLAR_TEMPERATURE = "heating.solar.sensors.temperature.collector";
     public const SOLAR_DHW_TEMPERATURE = "heating.solar.sensors.temperature.dhw";
-    public const VENTILATION = 'ventilation.operating.state';
 
 
     //    heating.buffer.sensors.temperature.main = température du tampon
@@ -367,9 +366,6 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 break;
             case self::HOLIDAY_AT_HOME_PROGRAM:
                 $this->createHolidayAtHomeProgramCommands($feature);
-                break;
-            case self::VENTILATION:
-                $this->createInfoCommand('ventilation', 'Ventilation', 'string');
                 break;
         }
     }
@@ -760,7 +756,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     $val = $feature["properties"]["value"]["value"];
                     $this->checkAndUpdateCmd('supplyProgramTemperature', $val);
                 } elseif (($feature["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM) ||
-                    $feature["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM_HEATING))) {
+                        $feature["feature"] == $this->buildFeature($circuitId, self::COMFORT_PROGRAM_HEATING))) {
                     $val = $feature["properties"]["temperature"]["value"];
                     $comfortProgramTemperature = $val;
                     $this->checkAndUpdateCmd('comfortProgramTemperature', $val);
@@ -1771,7 +1767,6 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
             'histoTemperatureExt' => ['name' => __('Historique température extérieure', __FILE__), 'type' => 'info', 'subType' => 'numeric', 'isVisible' => 1, 'isHistorized' => 1],
             'errors' => ['name' => __('Erreurs', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
             'currentError' => ['name' => __('Erreur courante', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
-            'ventilation' => ['name' => __('Ventilation', __FILE__), 'type' => 'info', 'subType' => 'string', 'isVisible' => 1, 'isHistorized' => 0],
         ];
 
         foreach ($commands as $logicalId => $command) {
