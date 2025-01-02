@@ -269,7 +269,7 @@ class ViessmannApi
     public function getFeatures()
     {
         log::add('viessmannIot', 'debug', 'getFeatures start');
-        $url = self::FEATURES_URL . "/installations/" . $this->installationId . "/gateways/" . $this->serial . "/devices/" . $this->deviceId . "/features?skipDisabled";
+        $url = self::FEATURES_URL . "/installations/" . $this->installationId . "/gateways/" . $this->serial . "/devices/" . $this->deviceId . "/features";
         $header = ["Authorization: Bearer " . $this->accessToken];
         $response = $this->makeCurlRequest($url, $header);
 
