@@ -194,6 +194,7 @@ class ViessmannApi
     private function refreshToken()
     {
         if (empty($this->refreshToken)) {
+            log::add('viessmannIot', 'debug', 'No Refresh token');
             return false;
         }
 
@@ -202,7 +203,7 @@ class ViessmannApi
         $response = $this->makeCurlRequest($url, $header, true);
 
         $json = json_decode($response, true);
-        if (!is_object($json) || isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
+        if (isset($json['error']) || !isset($json['access_token'], $json['expires_in'])) {
             log::add('viessmannIot', 'debug', 'Refresh token error');
             return false;
         }
