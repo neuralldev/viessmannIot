@@ -631,21 +631,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                 log::add('viessmannIot', 'warning', $return);
                 return null;
             }
-
             if ((empty($installationId)) || (empty($serial))) {
-                $installationId = $viessmannApi->getInstallationId($numChaudiere);
-                $serial = $viessmannApi->getSerial($numChaudiere);
-
-                $this->setConfiguration('installationId', $installationId);
-                $this->setConfiguration('serial', $serial)->save();
+                $this->setConfiguration('installationId', $viessmannApi->getInstallationId($numChaudiere));
+                $this->setConfiguration('serial', $viessmannApi->getSerial($numChaudiere))->save();
             }
             //              $this->deleteAllCommands();
             $this->createCommands($viessmannApi);
         }
 
         if ($viessmannApi->isNewToken()) {
-            $expires_at = time() + $viessmannApi->getExpiresIn() - 300;
-            $this->setCache('expires_at', $expires_at);
+            $this->setCache('expires_at', time() + $viessmannApi->getExpiresIn() - 300);
             $this->setCache('access_token', $viessmannApi->getAccessToken());
             $this->setCache('refresh_token', $viessmannApi->getRefreshToken());
         }
@@ -699,7 +694,6 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         
         foreach ($features["data"] as $feature)
             if ($feature["isEnabled"] == true) {
-                log::add('viessmannIot', 'debug', 'feature  '.$feature["feature"]);
                 if ($feature["feature"] == self::OUTSIDE_TEMPERATURE) {
                     $val = $feature["properties"]["value"]["value"];
                     $outsideTemperature = $val;
@@ -911,6 +905,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                         $this->checkAndUpdateCmd('isScheduleHolidayAtHomeProgram', 0);
                     }
                 }
+                log::add('viessmannIot', 'debug', 'feature  '.$feature["feature"]. ' value '.$val);
         }
 
         // gestion de la consommation 
