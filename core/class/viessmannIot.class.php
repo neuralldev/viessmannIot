@@ -905,7 +905,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                     } else {
                         $this->checkAndUpdateCmd('isScheduleHolidayAtHomeProgram', 0);
                     }
-                }
+               }
                 log::add('viessmannIot', 'debug', 'feature  '.$feature["feature"]. ' value '.$val);
         }
 
@@ -1841,7 +1841,7 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $replace["#uniteGaz#"] = $uniteGaz;
 
         $this->buildhtml($replace, 'roomTemperature', 'idRoomTemperature',false);
-        $this->buildhtml($replace, 'secondaryCircuitTemperature', 'idSecondaryCircuitTemperature',false);
+        $this->buildhtml($replace, 'secondaryCircuitTemperature', 'idSecondaryCircuitTemperature',true, 99);
         $this->buildhtml($replace, 'programTemperature', 'idProgramTemperature',false);
         $this->buildhtml($replace, 'hotWaterStorageTemperature', 'idHotWaterStorageTemperature',true, 99);
 
@@ -2398,7 +2398,6 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         return ($array);
     }
 }
-
 
 class viessmannIotCmd extends cmd
 {
