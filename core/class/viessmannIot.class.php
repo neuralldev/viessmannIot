@@ -663,10 +663,6 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         $facteurConversionGaz = floatval($this->getConfiguration('facteurConversionGaz', 1));
         if ($facteurConversionGaz == 0)  $facteurConversionGaz = 1;
 
-        $nbr = 0;
-        $erreurs = '';
-        $erreurCourante = '';
-
         $outsideTemperature = 99;
         $roomTemperature = 99;
         $slope = 99;
@@ -913,14 +909,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
         if (!$bConsumptionSeen) 
             $this->handleConsumptionSummary($features, $facteurConversionGaz);
 
-        // récupération des erreurs de la chaudière
+        // récupération des erreurs de la chaudière 1 fois par heure
+        $nbr = 0;
+        $erreurs = '';
+        $erreurCourante = '';
         $maintenant = time();
         $minute = date("i", $maintenant);
         if ($minute == 0 || $viessmannApi->getLogFeatures() == 'Oui') {
             $viessmannApi->getEvents();
             $events = $viessmannApi->getArrayEvents();
-            $timeZone = new DateTimeZone('Europe/Warsaw');  // +2 hours
-
+            $timeZone = new DateTimeZone(config::byKey('timezone'));  // time zone depuis jeedom
             foreach (array_reverse($events["data"]) as $event) {
                 if ($event["eventType"] == "device-error") {
                     $dateTime = new DateTime(str_replace('T', ' ', substr($event['eventTimestamp'], 0, 19)) . ' GMT');
@@ -934,14 +932,11 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
                         $erreurs .= ($nbr > 0 ? ';' : '') . ($event['body']['active'] ? 'AC;' : 'IN;') . $timeStamp . ';' . $errorDescription;
                         if ($event['body']['active']) {
                             $erreurCourante = $errorCode;
-                        } elseif ($erreurCourante == $errorCode) {
-                            $erreurCourante = '';
                         }
                     }
                     $nbr++;
                     }
                 }
-        
             $this->checkAndUpdateCmd('errors', $erreurs);
             $this->checkAndUpdateCmd('currentError', $erreurCourante);
         }
