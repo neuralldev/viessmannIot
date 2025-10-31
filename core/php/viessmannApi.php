@@ -157,7 +157,7 @@ class ViessmannApi
      */
     private function getCode()
     {
-        $url = self::AUTHORIZE_URL . "?client_id=" . $this->clientId . "&code_challenge=" . $this->codeChallenge . "&scope=IoT%20User%20offline_access&redirect_uri=" . self::CALLBACK_URI . "&response_type=code";
+        $url = self::AUTHORIZE_URL . "?client_id=" . $this->clientId . "&code_challenge=" . $this->codeChallenge . "&scope=IoT%20User&redirect_uri=" . self::CALLBACK_URI . "&response_type=code&code_challenge_method=S256";
         $header = ["Content-Type: application/x-www-form-urlencoded"];
         $response = $this->makeCurlRequest($url, $header, true);
         log::add('viessmannIot', 'debug', 'getCode response : ' . $response);

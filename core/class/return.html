@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/images/favicon.ico"
+        type="image/x-icon" />
+    <link href="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/css/material-components-web.min.css"
+        rel="stylesheet" />
+    <script src="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/js/material-components-web.min.js"></script>
+    <link href="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/css/iam.css" rel="stylesheet" />
+    <script src="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/js/iam.js"></script>
+    <link href="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/css/icon.css" rel="stylesheet" />
+    <script src="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/js/jquery-3.6.3.min.js"></script>
+    <link href="https://components.viessmann-climatesolutions.com/elements/dsw/v1.3.0/styles.css" rel="stylesheet"
+        type="text/css" />
+</head>
+
+<body onload="loadForms();">
+    <div class="mdc-panel-top">
+        <div class="mdc-panel-inner">
+            <div class="mdc-panel-left" id="mdc-panel-left">
+                <header class="mdc-top-app-bar">
+                    <section class="mdc-top-section">
+                        <div class="mdc-fsp-text-element mdc-iam-font-inter mdc-iam-font-account">Account</div>
+                        <div class="mdc-fsp-button mdc-fsp-button-header" id="CreateAccountButton"></div>
+                    </section>
+                </header> <img
+                    src="/idp/sso/v1/nevislogrend/applications/IDP_SSO_V1/webdata/images/iam-neutral-login-logos-all-grey.png"
+                    alt="Logos for Viessmann, Carrier, Toshiba, Riello, Beretta" id="multibrandlogo" />
+                <main class="bg-container">
+                    <section class="inside">
+                        <form class="b2b-form-space" id="Name" name="Name" method="POST" target="_self"
+                            action="https://iam.viessmann-climatesolutions.com/idp/v3/authorize?client_id=bb9569b954e35251fdacb874641e6acb&code_challenge=eyJraWQiOiI0YzBhZGFhYy1mMzY3LTRlNWItYTU5ZC02MmFjNWNhZTk2ZTgiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI1ZjQ5MTE3NS0zMDM5LTRiM2MtOGFmYi00NWQzMTRmZGExMTMiLCJjaC5hZG5vdnVtLm5ldmlzaWRtLnByb2ZpbGVJZCI6IjE2NjEwNDAiLCJuYmYiOjE3NjE5MzAwNDIsInNjb3BlIjoiSW9UIG9wZW5pZCIsImlzcyI6Imh0dHBzOi8vaWFtLnZpZXNzbWFubi1jbGltYXRlc29sdXRpb25zLmNvbSIsImV4cCI6MTc2MTkzMzY0MiwiaWF0IjoxNzYxOTMwMDQyLCJjbGllbnRfaWQiOiJiYjk1NjliOTU0ZTM1MjUxZmRhY2I4NzQ2NDFlNmFjYiJ9.OkexQKOvCfC9jcuV8INq1h86Qp4dsJOsS4pAlv6GkgYltnM231srdekinSJ8WGkSxogdbtObt98i5XCDYIDlv7SaWrhszTd8-cKP5F8Ib5JLtgBX1XDl-GsDg-Gz9C1wZ7-l84svjmPGgTNyB74zFb5KVw4jtjRUJg5pK2Mywmp43IjdIXOWe4QitITKZ__BHvLetCi_ViSTQbZ409p63A2YiSVQWjA4LfOhiQCDafhY-LpJnl2IOKSWXdUQIRVA-Qm12sS1e-4khKFa60vphV20Z-T_j_i_CfYHCbaTrYH-FOTgO6HtvCZjDw16lcBYLmElgz1k5-F9lbwsQgNiqui_kSovt1aa8DPiwpF1m7eGZeUd00JtIMlwEIxFJeRDvrPIJ-drzHALX8n0M2V0_Mm56_ODDYoKbrSfhwWKewr_ktzvW1ShJ0RJ61fsvgDFX9hB5tdnpzKihZdtWjzZSM7V-YgsFlqOdVCPxAZImoV8QE17VesqtdjT4BtdP9X0P_4GcHK7Mj0Jd42CCIeiH2X0rjmV0XPlHT0YdCtgLzEgBkozpmqPP0KXTshB_KEHTOX-vk1XA1Jy849eQiMD9W38nja8R4-URO_0qplUisApb7NUrh-TNEQi6xXVgz6cuhw4QHZoHud7c9NU7_su4NF2Xfcs9MY0fSnX1qI8TkQ&scope=IoT%20User%20offline_access&redirect_uri=http://localhost:4200/&response_type=code"
+                            autocomplete="off" accept-charset="UTF-8" onchange="spez.onformchange();">
+                            <div class="mdl-grid mdl-grid--no-spacing">
+                                <div
+                                    class="normal-text font-size-26px opacity-87 --mdc-theme-primary mdc-iam-font-viessmann-pro mdc-iam-font-big mdc-iam-info-title mdc-iam-font-title">
+                                    <p>Login</p>
+                                </div>
+                            </div> </label> <label class="mdc-text-field mdc-text-field--filled field text required"
+                                for="isiwebuserid"> <span class="mdc-text-field__ripple"></span> <span
+                                    class="mdc-floating-label" id="isiwebuserid-id">User name</span> <input
+                                    type="password" name="hidden-password" value="00" tabindex="-1" style="display:none"
+                                    autocomplete="off" /> <input name="isiwebuserid" value=""
+                                    class="mdc-text-field__input" type="text" aria-labelledby="isiwebuserid-id"
+                                    autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false"
+                                    size="20" maxlength="255" tabindex="5" required onkeyup="spez.onformchange();" />
+                            </label> </label>
+                            <div class="mdc-form-field mdl-fsp-checkbox">
+                                <div class="mdc-checkbox"> <input type="checkbox" class="mdc-checkbox__native-control"
+                                        id="stayloggedin" value="Stay logged on" name="stayloggedin" />
+                                    <div class="mdc-checkbox__background"> <svg alt="" class="mdc-checkbox__checkmark"
+                                            viewBox="0 0 24 64">
+                                            <path class="mdc-checkbox__checkmark-path" fill="none"
+                                                d="M1.73,12.91 8.1,19.28 22.79,4.59" />
+                                        </svg>
+                                        <div class="mdc-checkbox__mixedmark"></div>
+                                    </div>
+                                    <div class="mdc-checkbox__ripple"></div>
+                                </div> <label for="stayloggedin" class="mdc-iam-font-small">Stay logged on</label>
+                            </div> </label>
+                            <div class="mdc-fsp-button mdc-fsp-button-submitLogin"> <button
+                                    class="mdc-button mdc-button--raised mdc-button-big mdc-button-big-submit mdc-button-big-submitLogin"
+                                    type="submit" name="submitLogin" value="Next" id="submitButton"
+                                    onclick="return spez.formSubmit();" disabled="true"> <span
+                                        class="mdc-button__label mdc-iam-font-big">Next</span> </button> </div> </label>
+                            <div class="mdc-fsp-button-footer" id="CreateAccountButtonMobile"></div>
+                        </form>
+                        <script
+                            type="text/javascript"> 		spez.formEl = document.getElementById('Name'); spez.focousElement(document.forms['Name']); spez.footerCreateButton(); spez.onformchange(); function gcapSuccess(token) { document.getElementById("Name").submit(); } 	</script>
+                    </section>
+                </main>
+            </div>
+            <div class="mdc-panel-right" id="mdc-panel-right"></div>
+            <style>
+                div.mdl-grid>div.normal-text {
+                    text-align: left !important;
+                }
+
+                .inside {
+                    margin: auto 32px !important;
+                    max-width: none;
+                }
+            </style>
+        </div>
+    </div>
+    <div class="mdc-panel-footer"> <dsw-footer-element logo="multibrand"
+            privacy-policy-url="https://legal-policies.viessmann-climatesolutions.com/multibrand/privacy-policy.html"></dsw-footer-element>
+        <script type="module"
+            src="https://components.viessmann-climatesolutions.com/elements/dsw/v1.3.0/polyfills.js"></script>
+        <script type="module"
+            src="https://components.viessmann-climatesolutions.com/elements/dsw/v1.3.0/main.js"></script>
+    </div>
+</body>
+
+</html>
