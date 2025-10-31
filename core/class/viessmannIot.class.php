@@ -697,13 +697,6 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $bConsumptionSeen = false;
         $features = $viessmannApi->getArrayFeatures();
-        if ( is_array($features["data"])) {
-        if (array_key_exists("data", $features)) {
-            $nbrFeatures = count($features["data"]);
-        } else {
-            log::add('viessmannIot', 'warning', 'No data available');
-            return;
-        }
         foreach ($features["data"] as $feature)
             if ($feature["isEnabled"] == true) {
                 $val='';
