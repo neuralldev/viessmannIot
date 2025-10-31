@@ -4,7 +4,7 @@
 //
 class ViessmannApiException extends Exception
 {
-    public function __construct(string $message = "", int $code = 0, Throwable $previous = null)
+    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -157,7 +157,13 @@ class ViessmannApi
      */
     private function getCode()
     {
-        $url = self::AUTHORIZE_URL . "?client_id=" . $this->clientId . "&code_challenge=" . $this->codeChallenge . "&scope=IoT%20User&redirect_uri=" . self::CALLBACK_URI . "&response_type=code&code_challenge_method=S256";
+        $url = self::AUTHORIZE_URL . 
+            "?client_id=" . $this->clientId . 
+            "&redirect_uri=" . self::CALLBACK_URI . 
+            "&scope=IoT%20User" . 
+            "&response_type=code".
+            "&code_challenge_method=S256".
+            "&code_challenge=" . $this->codeChallenge;
         $header = ["Content-Type: application/x-www-form-urlencoded"];
         $response = $this->makeCurlRequest($url, $header, true);
         log::add('viessmannIot', 'debug', 'getCode response : ' . $response);
@@ -171,7 +177,12 @@ class ViessmannApi
      */
     private function getToken($code)
     {
-        $url = self::TOKEN_URL . "?grant_type=authorization_code&code_verifier=" . $this->codeChallenge . "&client_id=" . $this->clientId . "&redirect_uri=" . self::CALLBACK_URI . "&code=" . $code;
+        $url = self::TOKEN_URL . 
+            "?client_id=" . $this->clientId . 
+            "&redirect_uri=" . self::CALLBACK_URI . 
+            "&grant_type=authorization_code".
+            "&code_verifier=" . $this->codeChallenge . 
+            "&code=" . $code;
         $header = ["Content-Type: application/x-www-form-urlencoded"];
         $response = $this->makeCurlRequest($url, $header, true);
 
@@ -198,7 +209,10 @@ class ViessmannApi
             return false;
         }
 
-        $url = self::TOKEN_URL . "?grant_type=refresh_token&refresh_token=" . $this->refreshToken . "&client_id=" . $this->clientId;
+        $url = self::TOKEN_URL . 
+            "?client_id=" . $this->clientId.
+            "&grant_type=refresh_token".
+            "&refresh_token=" . $this->refreshToken;
         $header = ["Content-Type: application/x-www-form-urlencoded"];
         $response = $this->makeCurlRequest($url, $header, true);
 

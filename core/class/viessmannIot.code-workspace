@@ -1,13 +1,11 @@
 {
 	"folders": [
 		{
-			"path": "../.."
+			"path": "../../.."
 		},
 		{
 			"path": "../../../../../core"
 		}
 	],
-	"settings": {
-		"php.version": "7.4"
-	}
+	"settings": {}
 }
