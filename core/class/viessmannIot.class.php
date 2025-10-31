@@ -231,6 +231,16 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $features = $viessmannApi->getArrayFeatures();
         $n = count($features["data"]);
+        if ( $features == null )
+        {
+            log::add('viessmannIot', 'warning', 'Data is null');
+            $n = 0;
+        } else if (array_key_exists("data", $features)) {
+            $n = count($features["data"]);
+        } else {
+            log::add('viessmannIot', 'warning', 'No data available');
+            $n = 0;
+        }
         log::add('viessmannIot', 'debug', "parse " . $n . " features");
 
         foreach ($features["data"] as $feature) {
@@ -687,7 +697,13 @@ public const HEATPUMP_SECONDARY = "heating.secondaryCircuit.sensors.temperature.
 
         $bConsumptionSeen = false;
         $features = $viessmannApi->getArrayFeatures();
-        
+        if ( is_array($features["data"])) {
+        if (array_key_exists("data", $features)) {
+            $nbrFeatures = count($features["data"]);
+        } else {
+            log::add('viessmannIot', 'warning', 'No data available');
+            return;
+        }
         foreach ($features["data"] as $feature)
             if ($feature["isEnabled"] == true) {
                 $val='';
