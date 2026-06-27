@@ -2078,13 +2078,15 @@ class viessmannIot extends eqLogic
     public function getViessmann()
     {
         $clientId = trim($this->getConfiguration('clientId', ''));
-        // [CORRECTIF #2 - à valider] Déchiffrement du code challenge (verifier PKCE) stocké chiffré.
-        $codeChallenge = trim(utils::decrypt($this->getConfiguration('codeChallenge', '')));
+        // Déchiffrement du code challenge (verifier PKCE) stocké chiffré (cf. preSave).
+        // Cast en string car utils::decrypt('') renvoie null (évite trim(null) en PHP 8.1+).
+        $codeChallenge = trim((string) utils::decrypt($this->getConfiguration('codeChallenge', '')));
 
         $userName = trim($this->getConfiguration('userName', ''));
-        // [CORRECTIF #2 - à valider] Déchiffrement du mot de passe stocké chiffré (cf. preSave).
-        // utils::decrypt renvoie la valeur telle quelle si non chiffrée (compat. installs existantes).
-        $password = trim(utils::decrypt($this->getConfiguration('password', '')));
+        // Déchiffrement du mot de passe stocké chiffré (cf. preSave).
+        // utils::decrypt renvoie la valeur telle quelle si non chiffrée (compat. installs existantes),
+        // et null si la valeur est vide : on caste en string pour éviter trim(null) en PHP 8.1+.
+        $password = trim((string) utils::decrypt($this->getConfiguration('password', '')));
 
         $numChaudiere = trim($this->getConfiguration('numChaudiere', '0'));
 
@@ -3746,9 +3748,9 @@ class viessmannIot extends eqLogic
         foreach (self::byType('viessmannIot') as $viessmann) {
             if ($viessmann->getIsEnable() == 1) {
                 $userName = trim($viessmann->getConfiguration('userName', ''));
-                // [CORRECTIF #2 - à valider] Comparer les mots de passe en clair : chaque chiffrement
-                // utilise un IV aléatoire, donc 2 blobs 'crypt:' identiques en clair diffèrent en stockage.
-                $password = trim(utils::decrypt($viessmann->getConfiguration('password', '')));
+                // Comparaison sur les valeurs en clair : chaque chiffrement utilise un IV aléatoire,
+                // donc deux mots de passe identiques produisent des blobs 'crypt:' différents.
+                $password = trim((string) utils::decrypt($viessmann->getConfiguration('password', '')));
                 if ($first == false) {
                     if (($userName != $oldUserName) || ($password != $oldPassword)) {
                         $tousPareils = false;
@@ -4433,12 +4435,16 @@ class viessmannIot extends eqLogic
     //
     public function preSave()
     {
-        // [CORRECTIF #2 - à valider] Chiffrement du mot de passe Viessmann avant stockage.
-        // Évite le stockage en clair dans la configuration de l'équipement.
-        // utils::encrypt est idempotent (préfixe 'crypt:') : pas de double chiffrement au re-save.
-        $this->setConfiguration('password', utils::encrypt($this->getConfiguration('password', '')));
-        // [CORRECTIF #2 - à valider] Chiffrement du code challenge (verifier PKCE) avant stockage.
-        $this->setConfiguration('codeChallenge', utils::encrypt($this->getConfiguration('codeChallenge', '')));
+        // Chiffrement des données sensibles avant stockage (évite le stockage en clair dans la
+        // configuration de l'équipement). utils::encrypt est idempotent (préfixe 'crypt:') :
+        // pas de double chiffrement lors d'un nouvel enregistrement. On ne traite que les
+        // valeurs non vides (utils::encrypt('') renvoie null).
+        foreach (array('password', 'codeChallenge') as $champ) {
+            $valeur = $this->getConfiguration($champ, '');
+            if ($valeur !== '') {
+                $this->setConfiguration($champ, utils::encrypt($valeur));
+            }
+        }
     }
 
     // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
