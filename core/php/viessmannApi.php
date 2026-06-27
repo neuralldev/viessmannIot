@@ -192,6 +192,28 @@ class ViessmannApi
         }
     }
 
+    // [CORRECTIF #5 - à valider] Centralise l'exécution cURL : contrôle l'erreur de transport
+    // (réseau/TLS/timeout) et journalise le résultat. Sans ce contrôle, un échec cURL est
+    // silencieux (curl_exec renvoie false sans qu'aucun log ne soit émis).
+    //
+    private function httpExec($curloptions, $contexte)
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, $curloptions);
+        $response = curl_exec($curl);
+        $errno    = curl_errno($curl);
+        $error    = curl_error($curl);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        if ($response === false || $errno !== 0) {
+            log::add('viessmannIot', 'warning', "Echec contact serveur Viessmann ($contexte) : [$errno] $error");
+            return false;
+        }
+        log::add('viessmannIot', 'debug', "Serveur Viessmann contacté ($contexte) : HTTP $httpCode");
+        return $response;
+    }
+
     // Lire le code d'accès au serveur Viessmann
     //
     private function getCode()
@@ -222,10 +244,7 @@ class ViessmannApi
 
         // Appel Curl Code
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'getCode');
 
         // Extraction Code
         //
@@ -267,10 +286,7 @@ class ViessmannApi
 
         // Appel Curl Token
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'getToken');
 
         // Extraction Token
         //
@@ -335,10 +351,7 @@ class ViessmannApi
 
         // Appel Curl Token
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'refreshToken');
 
         // Extraction Token
         //
@@ -396,10 +409,7 @@ class ViessmannApi
 
         // Appel Curl Données
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'getIdentity');
 
         $this->identity = json_decode($response, true);
 
@@ -436,10 +446,7 @@ class ViessmannApi
 
         // Appel Curl Données
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'getGateway');
 
         $this->gateway = json_decode($response, true);
         $json_file = __DIR__ . '/../../data/gateway.json';
@@ -486,10 +493,7 @@ class ViessmannApi
 
         // Appel Curl Données
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'getFeatures');
 
         $this->features = json_decode($response, true);
 
@@ -555,10 +559,7 @@ class ViessmannApi
 
         // Appel Curl Données
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'getEvents');
 
         // Pour test
         //
@@ -608,10 +609,7 @@ class ViessmannApi
 
         // Appel Curl Données
         //
-        $curl = curl_init();
-        curl_setopt_array($curl, $curloptions);
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $response = $this->httpExec($curloptions, 'setFeature');
 
         $features = json_decode($response, true);
 
