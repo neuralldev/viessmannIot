@@ -206,11 +206,18 @@ class ViessmannApi
         $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
+        $url = isset($curloptions[CURLOPT_URL]) ? $curloptions[CURLOPT_URL] : '';
+
         if ($response === false || $errno !== 0) {
-            log::add('viessmannIot', 'warning', "Echec contact serveur Viessmann ($contexte) : [$errno] $error");
+            log::add('viessmannIot', 'warning', "Echec contact serveur Viessmann ($contexte) : [$errno] $error - URL : $url");
             return false;
         }
-        log::add('viessmannIot', 'debug', "Serveur Viessmann contacté ($contexte) : HTTP $httpCode");
+        // En cas de code HTTP d'erreur (>=400), on trace l'URL pour faciliter le diagnostic.
+        if ($httpCode >= 400) {
+            log::add('viessmannIot', 'warning', "Serveur Viessmann ($contexte) : HTTP $httpCode - URL : $url");
+        } else {
+            log::add('viessmannIot', 'debug', "Serveur Viessmann contacté ($contexte) : HTTP $httpCode - URL : $url");
+        }
         return $response;
     }
 
