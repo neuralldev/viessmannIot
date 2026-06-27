@@ -206,8 +206,15 @@ class ViessmannApi
         $curloptions = array(
            CURLOPT_URL => $url,
            CURLOPT_HTTPHEADER => $header,
-           CURLOPT_SSL_VERIFYPEER => false,
+           // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+           // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+           // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+           CURLOPT_SSL_VERIFYPEER => true,
            CURLOPT_RETURNTRANSFER => true,
+           // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+           // fige le démon de rafraîchissement (boucle cron salsa).
+           CURLOPT_CONNECTTIMEOUT => 10,
+           CURLOPT_TIMEOUT => 30,
            CURLOPT_USERPWD => $this->user.':'.$this->pwd,
            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
            CURLOPT_POST => true,
@@ -245,8 +252,15 @@ class ViessmannApi
         $curloptions = array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
+            // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+            // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+            // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_RETURNTRANSFER => true,
+            // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+            // fige le démon de rafraîchissement (boucle cron salsa).
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_POST => true,
         );
@@ -306,8 +320,15 @@ class ViessmannApi
         $curloptions = array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
+            // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+            // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+            // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_RETURNTRANSFER => true,
+            // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+            // fige le démon de rafraîchissement (boucle cron salsa).
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_POST => true,
         );
@@ -361,8 +382,15 @@ class ViessmannApi
         $curloptions = array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
+            // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+            // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+            // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_RETURNTRANSFER => true,
+            // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+            // fige le démon de rafraîchissement (boucle cron salsa).
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
         );
 
@@ -394,8 +422,15 @@ class ViessmannApi
         $curloptions = array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
+            // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+            // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+            // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_RETURNTRANSFER => true,
+            // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+            // fige le démon de rafraîchissement (boucle cron salsa).
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
         );
 
@@ -437,8 +472,15 @@ class ViessmannApi
         $curloptions = array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
+            // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+            // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+            // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_RETURNTRANSFER => true,
+            // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+            // fige le démon de rafraîchissement (boucle cron salsa).
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
         );
 
@@ -499,8 +541,15 @@ class ViessmannApi
         $curloptions = array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
+            // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+            // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+            // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_RETURNTRANSFER => true,
+            // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+            // fige le démon de rafraîchissement (boucle cron salsa).
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
         );
 
@@ -543,8 +592,15 @@ class ViessmannApi
         $curloptions = array(
             CURLOPT_URL => $url,
             CURLOPT_HTTPHEADER => $header,
-            CURLOPT_SSL_VERIFYPEER => false,
+            // [CORRECTIF #1 - à valider] Vérification TLS réactivée (ancienne valeur : false).
+            // Désactiver la vérification du certificat exposait les identifiants/tokens à une
+            // attaque MITM. Aucun motif de la désactiver vers les serveurs Viessmann publics.
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_RETURNTRANSFER => true,
+            // [CORRECTIF #4 - à valider] Timeouts ajoutés : sans eux, un appel HTTP bloqué
+            // fige le démon de rafraîchissement (boucle cron salsa).
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $data,

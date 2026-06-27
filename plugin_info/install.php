@@ -79,9 +79,23 @@ function viessmannIot_update()
         config::save('functionality::cronHourly::enable', 0, 'viessmannIot');
     }
 
+    // [CORRECTIF #2 - à valider] Migration automatique : chiffrement des champs sensibles
+    // restés en clair sur les installations antérieures au correctif. La détection se fait sur
+    // l'absence du préfixe 'crypt:' (heuristique utilisée par utils::encrypt/decrypt du core).
+    $champsSensibles = array('password', 'codeChallenge');
     foreach (viessmannIot::byType('viessmannIot') as $viessmann) {
-		$viessmann->setConfiguration('createCommands', 'Oui')->save(); 
-		$viessmann->save();
+        $migration = false;
+        foreach ($champsSensibles as $champ) {
+            $valeur = $viessmann->getConfiguration($champ, '');
+            if ($valeur !== '' && strpos($valeur, 'crypt:') === false) {
+                $viessmann->setConfiguration($champ, utils::encrypt($valeur));
+                $migration = true;
+            }
+        }
+        if ($migration) {
+            log::add('viessmannIot', 'info', 'Migration : chiffrement des identifiants de l\'équipement ' . $viessmann->getHumanName());
+        }
+        $viessmann->setConfiguration('createCommands', 'Oui')->save();
     }
 
 	$cron = cron::byClassAndFunction('viessmannIot', 'salsa');
