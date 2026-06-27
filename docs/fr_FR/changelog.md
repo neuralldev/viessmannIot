@@ -63,3 +63,11 @@
 
     Passage en v2 pour l'acquisition des données sur les serveurs Viessmann
 
+# 27-06-2026
+
+    Sécurité : réactivation de la vérification du certificat TLS sur les appels Viessmann
+    Sécurité : chiffrement du mot de passe et du code challenge (migration automatique des installations existantes)
+    Robustesse : ajout de timeouts sur les appels réseau pour éviter le blocage du démon
+    Journalisation : contrôle des erreurs réseau/HTTP et trace des appels (facilite le diagnostic)
+    Correction : retour de getFeatures sur le chemin de succès (warning PHP 8)
+
