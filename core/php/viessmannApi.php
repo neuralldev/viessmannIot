@@ -498,21 +498,20 @@ class ViessmannApi
             file_put_contents($json_file, $response);
         }
 
-        if ($this->features != null) {
-            if (array_key_exists('statusCode', $this->features)) {
-                $json_file = __DIR__ . '/../../data/erreur.json';
-                $response = str_replace($this->installationId, 'XXXXXX', $response);
-                $response = str_replace($this->serial, 'XXXXXXXXXXXXXXXX', $response);
-                file_put_contents($json_file, $response);
+        if ($this->features != null && array_key_exists('statusCode', $this->features)) {
+            $json_file = __DIR__ . '/../../data/erreur.json';
+            $response = str_replace($this->installationId, 'XXXXXX', $response);
+            $response = str_replace($this->serial, 'XXXXXXXXXXXXXXXX', $response);
+            file_put_contents($json_file, $response);
 
-                $message = $this->features["message"];
-                if (array_key_exists('extendedPayload', $this->features)) {
-                    $array = $this->features["extendedPayload"];
-                    if (array_key_exists('details', $array)) {
-                        $message .= ' ( ' . $array['details'] . ' ) ';
-                    }
+            $message = array_key_exists('message', $this->features) ? $this->features["message"] : 'Erreur inconnue';
+            if (array_key_exists('extendedPayload', $this->features)) {
+                $array = $this->features["extendedPayload"];
+                if (array_key_exists('details', $array)) {
+                    $message .= ' ( ' . $array['details'] . ' ) ';
                 }
             }
+            // Sur erreur applicative, on renvoie le message (chaîne) au lieu de true.
             return $message;
         }
 
